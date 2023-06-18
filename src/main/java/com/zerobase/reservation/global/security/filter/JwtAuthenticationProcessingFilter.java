@@ -2,7 +2,7 @@ package com.zerobase.reservation.global.security.filter;
 
 import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.global.security.jwt.JwtService;
-import com.zerobase.reservation.repository.MemberRepository;
+import com.zerobase.reservation.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

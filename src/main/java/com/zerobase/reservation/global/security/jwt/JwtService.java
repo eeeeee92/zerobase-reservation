@@ -4,7 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.dto.member.MemberDto;
-import com.zerobase.reservation.repository.MemberRepository;
+import com.zerobase.reservation.repository.member.MemberRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

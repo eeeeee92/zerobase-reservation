@@ -8,7 +8,7 @@ import com.zerobase.reservation.global.security.hadnler.OAuth2LoginFailureHandle
 import com.zerobase.reservation.global.security.hadnler.OAuth2LoginSuccessHandler;
 import com.zerobase.reservation.global.security.jwt.CustomJsonUsernamePasswordAuthenticationFilter;
 import com.zerobase.reservation.global.security.jwt.JwtService;
-import com.zerobase.reservation.repository.MemberRepository;
+import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.service.member.CustomOAuth2UserService;
 import com.zerobase.reservation.service.member.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;

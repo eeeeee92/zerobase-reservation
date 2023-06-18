@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerobase.reservation.dto.member.MemberDto;
 import com.zerobase.reservation.dto.oauth2.CustomOAuth2User;
 import com.zerobase.reservation.global.security.jwt.JwtService;
-import com.zerobase.reservation.repository.MemberRepository;
+import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.type.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

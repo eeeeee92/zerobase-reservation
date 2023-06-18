@@ -3,7 +3,7 @@ package com.zerobase.reservation.service.member;
 import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.dto.oauth2.CustomOAuth2User;
 import com.zerobase.reservation.dto.oauth2.OAuthAttributes;
-import com.zerobase.reservation.repository.MemberRepository;
+import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.type.SocialType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
