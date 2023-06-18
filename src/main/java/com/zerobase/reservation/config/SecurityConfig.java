@@ -9,8 +9,8 @@ import com.zerobase.reservation.global.security.hadnler.OAuth2LoginSuccessHandle
 import com.zerobase.reservation.global.security.jwt.CustomJsonUsernamePasswordAuthenticationFilter;
 import com.zerobase.reservation.global.security.jwt.JwtService;
 import com.zerobase.reservation.repository.MemberRepository;
-import com.zerobase.reservation.service.CustomOAuth2UserService;
-import com.zerobase.reservation.service.CustomUserDetailsService;
+import com.zerobase.reservation.service.member.CustomOAuth2UserService;
+import com.zerobase.reservation.service.member.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

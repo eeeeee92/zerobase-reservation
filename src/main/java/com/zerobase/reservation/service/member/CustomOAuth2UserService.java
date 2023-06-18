@@ -1,4 +1,4 @@
-package com.zerobase.reservation.service;
+package com.zerobase.reservation.service.member;
 
 import com.zerobase.reservation.domain.Member;
 import com.zerobase.reservation.dto.oauth2.CustomOAuth2User;

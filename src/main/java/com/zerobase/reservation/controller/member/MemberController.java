@@ -1,7 +1,7 @@
 package com.zerobase.reservation.controller.member;
 
 import com.zerobase.reservation.dto.member.SignupDto;
-import com.zerobase.reservation.service.MemberService;
+import com.zerobase.reservation.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
