@@ -1,6 +1,6 @@
 package com.zerobase.reservation.service.member;
 
-import com.zerobase.reservation.domain.Member;
+import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.repository.MemberRepository;
 import com.zerobase.reservation.type.Role;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.zerobase.reservation.repository;
 
-import com.zerobase.reservation.domain.Member;
+import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.type.SocialType;
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -1,6 +1,6 @@
 package com.zerobase.reservation.global.security.filter;
 
-import com.zerobase.reservation.domain.Member;
+import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.global.security.jwt.JwtService;
 import com.zerobase.reservation.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;

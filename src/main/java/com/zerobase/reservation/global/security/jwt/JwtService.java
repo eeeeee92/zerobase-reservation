@@ -2,7 +2,7 @@ package com.zerobase.reservation.global.security.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.zerobase.reservation.domain.Member;
+import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.dto.member.MemberDto;
 import com.zerobase.reservation.repository.MemberRepository;
 import lombok.Getter;

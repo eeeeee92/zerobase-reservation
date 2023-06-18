@@ -1,4 +1,4 @@
-package com.zerobase.reservation.domain;
+package com.zerobase.reservation.domain.member;
 
 import com.zerobase.reservation.type.Role;
 import com.zerobase.reservation.type.SocialType;

@@ -1,6 +1,6 @@
 package com.zerobase.reservation.service.member;
 
-import com.zerobase.reservation.domain.Member;
+import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.dto.oauth2.CustomOAuth2User;
 import com.zerobase.reservation.dto.oauth2.OAuthAttributes;
 import com.zerobase.reservation.repository.MemberRepository;

@@ -1,6 +1,6 @@
 package com.zerobase.reservation.dto.oauth2;
 
-import com.zerobase.reservation.domain.Member;
+import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.type.Role;
 import com.zerobase.reservation.type.SocialType;
 import lombok.Builder;
