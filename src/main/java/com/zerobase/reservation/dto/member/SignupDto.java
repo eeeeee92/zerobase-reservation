@@ -6,14 +6,21 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SignupDto {
-
+    @Email
     private String email;
+    @NotNull
     private String password;
+    @NotNull
     private String nickname;
+    @NotNull
     private String phoneNumber;
+    @NotNull
     private Role role;
 
     @Builder
