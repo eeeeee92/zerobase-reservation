@@ -4,6 +4,7 @@ import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.domain.shop.MemberShop;
 import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.shop.ShopDto;
+import com.zerobase.reservation.global.exception.ArgumentException;
 import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.repository.shop.MemberShopRepository;
 import com.zerobase.reservation.repository.shop.ShopRepository;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.zerobase.reservation.global.exception.ErrorCode.MEMBER_NOT_FOUND;
 
 @Service
 @Slf4j
@@ -21,12 +24,14 @@ public class ShopService {
     private final MemberShopRepository memberShopRepository;
     private final MemberRepository memberRepository;
 
-    /** 매장 등록 **/
+    /**
+     * 매장 등록
+     **/
     @Transactional
-    public ShopDto createShop(String email, String name, Double latitude, Double longitude){
+    public ShopDto createShop(String email, String name, Double latitude, Double longitude) {
 
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원"));
+                .orElseThrow(() -> new ArgumentException(MEMBER_NOT_FOUND, email));
         Shop saveShop = shopRepository.save(getShopBy(name, latitude, longitude));
         memberShopRepository.save(getMemberShopBy(member, saveShop));
 

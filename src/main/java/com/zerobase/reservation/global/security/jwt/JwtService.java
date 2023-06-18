@@ -4,6 +4,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.dto.member.MemberDto;
+import com.zerobase.reservation.global.exception.ArgumentException;
+import com.zerobase.reservation.global.exception.ErrorCode;
 import com.zerobase.reservation.repository.member.MemberRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -104,7 +106,7 @@ public class JwtService {
     public MemberDto updateRefreshToken(String email, String refreshToken) {
 
         Member member = memberRepository.findByEmail(email).orElseThrow(()
-                -> new IllegalArgumentException("일치하는 회원이 없습니다"));
+                -> new ArgumentException(ErrorCode.MEMBER_NOT_FOUND, email));
         member.updateRefreshToken(refreshToken);
 
         return MemberDto.of(member);
