@@ -73,7 +73,7 @@ public class JwtService {
 
     public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
         this.sendAccessToken(response, accessToken);
-        this.sendAccessToken(response, refreshToken);
+        this.sendRefreshToken(response, refreshToken);
     }
 
     public Optional<String> extractRefreshToken(HttpServletRequest request) {
