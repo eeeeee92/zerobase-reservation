@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.zerobase.reservation.global.exception.ErrorCode.MEMBER_NOT_FOUND;
+import static com.zerobase.reservation.global.exception.ErrorCode.SHOP_NOT_FOUND;
+import static java.lang.String.valueOf;
 
 @Service
 @Slf4j
@@ -25,7 +27,7 @@ public class ShopService {
     private final MemberRepository memberRepository;
 
     /**
-     * 매장 등록
+     * 상점 등록
      **/
     @Transactional
     public ShopDto createShop(String email, String name, Double latitude, Double longitude) {
@@ -38,10 +40,14 @@ public class ShopService {
         return ShopDto.of(saveShop);
     }
 
-//    /** 매장 상세 조회 */
-//    public ShopDto getShop(Long ShopId) {
-//
-//    }
+    /**
+     * 상점 상세 조회
+     */
+    public ShopDto getShop(Long shopId) {
+        Shop findShop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new ArgumentException(SHOP_NOT_FOUND, valueOf(shopId)));
+        return ShopDto.of(findShop);
+    }
 
 
     private MemberShop getMemberShopBy(Member member, Shop saveShop) {
