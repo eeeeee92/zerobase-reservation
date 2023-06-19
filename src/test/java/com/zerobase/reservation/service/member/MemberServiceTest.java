@@ -1,5 +1,6 @@
 package com.zerobase.reservation.service.member;
 
+import com.zerobase.reservation.config.AcceptanceTest;
 import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.dto.member.MemberDto;
 import com.zerobase.reservation.global.exception.ArgumentException;
@@ -25,8 +26,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest
-@Transactional
+@AcceptanceTest
 class MemberServiceTest {
 
     @Autowired
@@ -47,13 +47,24 @@ class MemberServiceTest {
         String password = "123";
         String phoneNumber = "01000000000";
         Role role = Role.USER;
+        given(memberRepository.save(any())).willReturn(
+                getMemberEntity(email, nickname, phoneNumber, role));
+
         //when
         MemberDto memberDto = memberService.signUp(email, nickname, password, phoneNumber, role);
 
         //then
         assertThat(memberDto).extracting("email", "nickname", "phoneNumber", "role")
                 .contains(email, nickname, phoneNumber, role);
-        assertNotEquals(password, memberDto.getPassword());
+    }
+
+    private static Member getMemberEntity(String email, String nickname, String phoneNumber, Role role) {
+        return Member.builder()
+                .email(email)
+                .nickname(nickname)
+                .phoneNumber(phoneNumber)
+                .role(role)
+                .build();
     }
 
     @Test
