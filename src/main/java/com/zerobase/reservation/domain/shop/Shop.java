@@ -19,17 +19,18 @@ public class Shop {
 
     private String name;
 
-    private Double rating;
-
     private Double latitude;
 
     private Double longitude;
 
+    private Double rating;
+
     @Builder
-    private Shop(String name, Double latitude, Double longitude) {
+    private Shop(String name, Double latitude, Double longitude, Double rating) {
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.rating = rating;
     }
 
 }

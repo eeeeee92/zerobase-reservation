@@ -1,17 +1,19 @@
 package com.zerobase.reservation.dto.shop;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
-
 
 
 public class CreateShopDto {
 
 
     @Getter
-    @NoArgsConstructor
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class Request {
         @Email
         @NotNull
@@ -20,10 +22,17 @@ public class CreateShopDto {
         @NotNull
         private String name;
 
-        @NotNull
         private Double latitude;
 
-        @NotNull
         private Double longitude;
+
+        @Builder
+        private Request(String email, String name, Double latitude, Double longitude) {
+            this.email = email;
+            this.name = name;
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
     }
+
 }
