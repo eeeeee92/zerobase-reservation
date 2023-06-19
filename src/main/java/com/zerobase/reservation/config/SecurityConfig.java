@@ -54,7 +54,7 @@ public class SecurityConfig {
 
                 .authorizeRequests()
                 .antMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console/**").permitAll()
-                .antMatchers("/member/sign-up").permitAll()
+                .antMatchers("/members/sign-up").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
