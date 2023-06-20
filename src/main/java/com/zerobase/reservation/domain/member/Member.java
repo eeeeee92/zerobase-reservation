@@ -53,6 +53,13 @@ public class Member {
         this.role = Role.USER;
     }
 
+    public void updateMember(String password, String nickname, String imageUrl, String phoneNumber){
+        this.password = password;
+        this.nickname = nickname;
+        this.imageUrl = imageUrl;
+        this.phoneNumber = phoneNumber;
+    }
+
     public void updateRefreshToken(String updateRefreshToken){
         this.refreshToken = updateRefreshToken;
     }

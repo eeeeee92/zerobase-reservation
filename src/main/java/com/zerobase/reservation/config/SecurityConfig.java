@@ -13,6 +13,7 @@ import com.zerobase.reservation.service.member.CustomOAuth2UserService;
 import com.zerobase.reservation.service.member.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -54,7 +55,8 @@ public class SecurityConfig {
 
                 .authorizeRequests()
                 .antMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console/**").permitAll()
-                .antMatchers("/members/sign-up").permitAll()
+                .antMatchers(HttpMethod.POST, "/members/sign-up").permitAll()
+                .antMatchers(HttpMethod.GET, "/shops/{shopId}").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
