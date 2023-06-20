@@ -1,5 +1,6 @@
 package com.zerobase.reservation.controller.member;
 
+import com.zerobase.reservation.dto.member.DeleteMemberDto;
 import com.zerobase.reservation.dto.member.SignupDto;
 import com.zerobase.reservation.dto.member.UpdateMemberDto;
 import com.zerobase.reservation.service.member.MemberService;
@@ -34,14 +35,23 @@ public class MemberController {
     @PutMapping("/{email}")
     @PreAuthorize("isAuthenticated() and ((#email == principal.username))")
     public ResponseEntity<?> update(@PathVariable String email,
-                                    @Valid @RequestBody UpdateMemberDto.Request memberUpdateDto) {
+                                    @Valid @RequestBody UpdateMemberDto.Request updateMemberDto) {
 
         memberService.update(
                 email,
-                memberUpdateDto.getPassword(),
-                memberUpdateDto.getNickname(),
-                memberUpdateDto.getImageUrl(),
-                memberUpdateDto.getPhoneNumber());
+                updateMemberDto.getPassword(),
+                updateMemberDto.getNickname(),
+                updateMemberDto.getImageUrl(),
+                updateMemberDto.getPhoneNumber());
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{email}")
+    @PreAuthorize("isAuthenticated() and ((#email == principal.username))")
+    public ResponseEntity<?> delete(@PathVariable String email,
+                                    @RequestBody DeleteMemberDto.Request deleteMemberDto) {
+
+        memberService.delete(email, deleteMemberDto.getPassword());
         return ResponseEntity.ok().build();
     }
 }

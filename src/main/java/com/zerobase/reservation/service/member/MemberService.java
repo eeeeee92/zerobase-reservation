@@ -56,6 +56,22 @@ public class MemberService {
         return MemberDto.of(member);
     }
 
+    @Transactional
+    public void delete(String email, String password) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new ArgumentException(ErrorCode.MEMBER_NOT_FOUND, email));
+
+        passwordValid(password, member.getPassword());
+
+        memberRepository.delete(member);
+    }
+
+    private void passwordValid(String password, String encodedPassword) {
+        if(!passwordEncoder.matches(password, encodedPassword)){
+            throw new ArgumentException(ErrorCode.UN_MATCH_PASSWORD);
+        }
+    }
+
     private Member build(String email, String nickname, String password, String phoneNumber, Role role) {
         return Member.builder()
                 .email(email)
@@ -65,5 +81,6 @@ public class MemberService {
                 .role(role)
                 .build();
     }
+
 
 }

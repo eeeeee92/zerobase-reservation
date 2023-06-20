@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -24,6 +26,13 @@ public class Shop {
     private Double longitude;
 
     private Double rating;
+
+    @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<MemberShop> memberShops = new ArrayList<>();
+
+    @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StarRating> starRatings = new ArrayList<>();
+
 
     @Builder
     private Shop(String name, Double latitude, Double longitude, Double rating) {
