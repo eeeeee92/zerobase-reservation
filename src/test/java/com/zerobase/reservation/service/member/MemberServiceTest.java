@@ -211,6 +211,48 @@ class MemberServiceTest {
 
     }
 
+    @Test
+    @DisplayName("회원 탈퇴")
+    public void delete() throws Exception {
+        //given
+        String email = "zerobase@naver.com";
+        String password = "password";
+        Member member = Member.builder()
+                .password(password)
+                .build();
+        given(memberRepository.findByEmail(email)).willReturn(Optional.of(member));
+        given(passwordEncoder.matches(password, member.getPassword())).willReturn(true);
+        //when
+        memberService.delete(email, password);
+
+        //then
+        verify(passwordEncoder, times(1)).matches(password, member.getPassword());
+        verify(memberRepository, times(1)).delete(member);
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴시 비밀번호가 일치하지 않을 시 예외가 발생한다")
+    public void delete_unMatchPassword() throws Exception {
+        //given
+        String email = "zerobase@naver.com";
+        String memberPassword = "password";
+        String requestPassword = "request";
+        Member member = Member.builder()
+                .password(memberPassword)
+                .build();
+        given(memberRepository.findByEmail(email)).willReturn(Optional.of(member));
+        given(passwordEncoder.matches(requestPassword, memberPassword)).willReturn(false);
+        ArgumentException argumentException = new ArgumentException(ErrorCode.UN_MATCH_PASSWORD);
+
+        //when
+        ArgumentException exception = assertThrows(ArgumentException.class, () -> memberService.delete(email, requestPassword));
+
+        //then
+        assertThat(exception).extracting("errorCode", "errorMessage")
+                .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
+    }
+
+
     private static Member getMemberEntity(String email, String nickname, String phoneNumber, Role role) {
         return Member.builder()
                 .email(email)

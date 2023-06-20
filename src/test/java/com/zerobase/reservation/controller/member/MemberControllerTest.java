@@ -1,6 +1,7 @@
 package com.zerobase.reservation.controller.member;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zerobase.reservation.dto.member.DeleteMemberDto;
 import com.zerobase.reservation.dto.member.SignupDto;
 import com.zerobase.reservation.dto.member.UpdateMemberDto;
 import com.zerobase.reservation.service.member.MemberService;
@@ -13,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static com.zerobase.reservation.type.Role.USER;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -67,7 +69,27 @@ class MemberControllerTest {
         String json = objectMapper.writeValueAsString(request);
 
         //when //then
-        mockMvc.perform(put("/members/{email}",email)
+        mockMvc.perform(put("/members/{email}", email)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                ).andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("회원탈퇴")
+    @WithMockUser
+    public void delete() throws Exception {
+        //given
+        String email = "zerobase@naver.com";
+        DeleteMemberDto.Request request = DeleteMemberDto.Request.builder()
+                .password("1234")
+                .build();
+        String json = objectMapper.writeValueAsString(request);
+
+        //when //then
+        mockMvc.perform(MockMvcRequestBuilders.delete("/members/{email}", email)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
