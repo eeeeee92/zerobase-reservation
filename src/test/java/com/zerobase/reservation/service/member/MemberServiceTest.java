@@ -4,23 +4,23 @@ import com.zerobase.reservation.config.AcceptanceTest;
 import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.dto.member.MemberDto;
 import com.zerobase.reservation.global.exception.ArgumentException;
+import com.zerobase.reservation.global.exception.ErrorCode;
 import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.type.Role;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 import static com.zerobase.reservation.global.exception.ErrorCode.ALREADY_EXIST_EMAIL;
 import static com.zerobase.reservation.global.exception.ErrorCode.ALREADY_EXIST_NICKNAME;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -58,14 +58,6 @@ class MemberServiceTest {
                 .contains(email, nickname, phoneNumber, role);
     }
 
-    private static Member getMemberEntity(String email, String nickname, String phoneNumber, Role role) {
-        return Member.builder()
-                .email(email)
-                .nickname(nickname)
-                .phoneNumber(phoneNumber)
-                .role(role)
-                .build();
-    }
 
     @Test
     @DisplayName("회원가입시 이메일이 이미 존재한다면 예외가 발생한다")
@@ -121,7 +113,7 @@ class MemberServiceTest {
         String nickname = "제로베이스";
         String password = "123";
         String phoneNumber = "01000000000";
-        String encodingPassword  = "암호화";
+        String encodingPassword = "암호화";
         Role role = Role.USER;
         Member member = Member.builder()
                 .email(email)
@@ -142,5 +134,89 @@ class MemberServiceTest {
         verify(memberRepository, times(1)).save(captor.capture());
         verify(passwordEncoder, times(1)).encode(any());
         assertEquals(encodingPassword, captor.getValue().getPassword());
+    }
+
+    @Test
+    @DisplayName("회원을 업데이트한다")
+    public void update() throws Exception {
+        //given
+        String email = "zerobase@naver.com";
+        String nickname = "닉네임";
+        String password = "password";
+        String imageUrl = "imageUrl";
+        Member member = Member.builder()
+                .email(email)
+                .nickname(nickname)
+                .password(password)
+                .imageUrl(imageUrl)
+                .phoneNumber("01000000000")
+                .role(Role.GUEST)
+                .build();
+        String encodedPassword = "encodedPassword";
+        given(memberRepository.findByEmail(email)).willReturn(Optional.of(member));
+        given(passwordEncoder.encode(password)).willReturn(encodedPassword);
+
+        //when
+        MemberDto memberDto = memberService.update(email, password, nickname, imageUrl, null);
+
+        //then
+        assertThat(memberDto).extracting("email", "password", "nickname", "imageUrl", "phoneNumber", "role")
+                .contains(email, encodedPassword, nickname, imageUrl, null, Role.USER);
+    }
+
+    @Test
+    @DisplayName("회원을 업데이트시 회원이 존재하지 않으면 예외가 발생한다")
+    public void update_memberNotFound() throws Exception {
+        //given
+        String email = "zerobase@naver.com";
+        String nickname = "닉네임";
+        String password = "password";
+        String imageUrl = "imageUrl";
+
+
+        given(memberRepository.findByEmail(email)).willReturn(Optional.empty());
+        ArgumentException argumentException = new ArgumentException(ErrorCode.MEMBER_NOT_FOUND, email);
+
+        //when //then
+        ArgumentException exception = assertThrows(ArgumentException.class, () -> memberService.update(email, password, nickname, imageUrl, null));
+
+        assertThat(exception).extracting("errorCode", "errorMessage")
+                .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
+
+    }
+
+    @Test
+    @DisplayName("닉네임 변경시 닉네임이 이미 존재하면 예외가 발생한다")
+    public void update_alreadyExistNickname() throws Exception {
+        //given
+        String nickname = "닉네임";
+        String updateNickname = "updateNickname";
+
+
+        String email = "zerobase@naver.com";
+        String password = "password";
+        String imageUrl = "imageUrl";
+        Member member = Member.builder()
+                .nickname(nickname)
+                .build();
+        given(memberRepository.findByEmail(email)).willReturn(Optional.of(member));
+        given(memberRepository.findByNickname(updateNickname)).willReturn(Optional.of(Member.builder().nickname(updateNickname).build()));
+        ArgumentException argumentException = new ArgumentException(ALREADY_EXIST_NICKNAME, updateNickname);
+
+        //when //then
+        ArgumentException exception = assertThrows(ArgumentException.class, () -> memberService.update(email, password, updateNickname, imageUrl, null));
+
+        assertThat(exception).extracting("errorCode", "errorMessage")
+                .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
+
+    }
+
+    private static Member getMemberEntity(String email, String nickname, String phoneNumber, Role role) {
+        return Member.builder()
+                .email(email)
+                .nickname(nickname)
+                .phoneNumber(phoneNumber)
+                .role(role)
+                .build();
     }
 }

@@ -2,6 +2,7 @@ package com.zerobase.reservation.controller.member;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerobase.reservation.dto.member.SignupDto;
+import com.zerobase.reservation.dto.member.UpdateMemberDto;
 import com.zerobase.reservation.service.member.MemberService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static com.zerobase.reservation.type.Role.USER;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,6 +45,29 @@ class MemberControllerTest {
 
         //when //then
         mockMvc.perform(post("/members/sign-up")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                ).andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("회원 수정")
+    @WithMockUser
+    public void update() throws Exception {
+        //given
+        String email = "zerobase@naver.com";
+        UpdateMemberDto.Request request = UpdateMemberDto.Request.builder()
+                .password("1234")
+                .nickname("nickname")
+                .phoneNumber("01000000000")
+                .imageUrl("imageUrl")
+                .build();
+        String json = objectMapper.writeValueAsString(request);
+
+        //when //then
+        mockMvc.perform(put("/members/{email}",email)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
