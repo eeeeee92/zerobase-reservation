@@ -34,25 +34,25 @@ class ReservationRepositoryTest {
         Shop shop = Shop.builder()
                 .name("shop1")
                 .build();
-        LocalDateTime startDateTime = LocalDateTime.of(2022, 05, 23, 12,00);
-        LocalDateTime endDateTime = startDateTime.plusDays(3);
+        LocalDateTime startDateTime = LocalDateTime.of(2022, 05, 29, 0,0);
+        LocalDateTime endDateTime = LocalDateTime.of(2022, 06, 5, 0,0);
         Reservation reservation = Reservation.builder()
                 .member(member)
                 .shop(shop)
                 .startDateTime(startDateTime)
                 .endDateTime(endDateTime)
                 .build();
-        LocalDateTime anotherStart = LocalDateTime.of(2022, 05, 26, 12, 01);
-        LocalDateTime anotherEnd = anotherStart.plusDays(6);
+        LocalDateTime wantStartDate = LocalDateTime.of(2022, 6, 5, 0, 0,1);
+        LocalDateTime wantEndDate = LocalDateTime.of(2022, 6, 6, 12, 0);
         memberRepository.save(member);
-        shopRepository.save(shop);
+        Shop saveShop = shopRepository.save(shop);
         reservationRepository.save(reservation);
 
         //when
-        Optional<Reservation> reservation1 = reservationRepository.confirmReservation(anotherStart, anotherEnd);
+        Optional<Reservation> reservation1 = reservationRepository.confirmReservation(wantStartDate, wantEndDate, saveShop.getId());
 
         //then
-        Assertions.assertFalse(reservation1.isPresent());
+        Assertions.assertTrue(reservation1.isEmpty());
 
     }
 }
