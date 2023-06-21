@@ -32,8 +32,9 @@ public class ReservationDto {
         this.arrivalStatus = arrivalStatus;
     }
 
-    public static final ReservationDto of(Reservation reservation){
+    public static final ReservationDto of(Reservation reservation) {
         return ReservationDto.builder()
+                .id(reservation.getId())
                 .shop(reservation.getShop())
                 .member(reservation.getMember())
                 .startDateTime(reservation.getStartDateTime())
