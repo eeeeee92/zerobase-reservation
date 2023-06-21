@@ -1,5 +1,6 @@
 package com.zerobase.reservation.domain.member;
 
+import com.zerobase.reservation.domain.reservation.Reservation;
 import com.zerobase.reservation.domain.shop.MemberShop;
 import com.zerobase.reservation.domain.shop.StarRating;
 import com.zerobase.reservation.type.Role;
@@ -40,6 +41,9 @@ public class Member {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StarRating> starRatings = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reservation> reservations = new ArrayList<>();
 
     @Builder
     private Member(String email, String password, String nickname, String imageUrl, String phoneNumber, Role role, SocialType socialType, String socialId, String refreshToken) {

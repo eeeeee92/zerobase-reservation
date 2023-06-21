@@ -1,5 +1,6 @@
 package com.zerobase.reservation.domain.shop;
 
+import com.zerobase.reservation.domain.reservation.Reservation;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,6 +34,8 @@ public class Shop {
     @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StarRating> starRatings = new ArrayList<>();
 
+    @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reservation> reservations = new ArrayList<>();
 
     @Builder
     private Shop(String name, Double latitude, Double longitude, Double rating) {
