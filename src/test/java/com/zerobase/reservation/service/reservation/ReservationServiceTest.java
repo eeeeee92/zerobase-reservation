@@ -5,6 +5,7 @@ import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.domain.reservation.Reservation;
 import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.reservation.ReservationDto;
+import com.zerobase.reservation.dto.reservation.SearchConditionReservationDto;
 import com.zerobase.reservation.global.exception.ArgumentException;
 import com.zerobase.reservation.global.exception.ErrorCode;
 import com.zerobase.reservation.repository.member.MemberRepository;
@@ -16,11 +17,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -116,7 +124,7 @@ class ReservationServiceTest {
                 .build();
         given(memberRepository.findByEmail(email)).willReturn(Optional.of(member));
         given(shopRepository.findById(any())).willReturn(Optional.of(shop));
-        given(reservationRepository.confirmReservation(startDateTime, endDateTime)).willReturn(Optional.of(reservation));
+        given(reservationRepository.confirmReservation(any(), any(), any())).willReturn(Optional.of(reservation));
         ArgumentException argumentException = new ArgumentException(ErrorCode.ALREADY_EXIST_RESERVATION, String.format("%s or %s", startDateTime, endDateTime));
 
         //when //then
@@ -125,5 +133,43 @@ class ReservationServiceTest {
                 .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
 
 
+    }
+
+
+    @Test
+    @DisplayName("검색조건에 따른 예약 전체조회")
+    public void getReservations() throws Exception {
+        //given
+        LocalDateTime startDateTime1 = LocalDateTime.now().plusDays(1);
+        LocalDateTime endDateTime2 = LocalDateTime.now().plusDays(2);
+        LocalDateTime startDateTime3 = LocalDateTime.now().plusDays(3);
+        LocalDateTime endDateTime4 = LocalDateTime.now().plusDays(4);
+
+        Reservation reservation = Reservation.builder()
+                .startDateTime(startDateTime1)
+                .endDateTime(endDateTime2)
+                .build();
+        Reservation reservation1 = Reservation.builder()
+                .startDateTime(startDateTime3)
+                .endDateTime(endDateTime4)
+                .build();
+        List<Reservation> content = Arrays.asList(reservation, reservation1);
+        PageRequest pageable = PageRequest.of(0, 2);
+        PageImpl<Reservation> reservations = new PageImpl<>(content, pageable, 2);
+        given(reservationRepository.findAllBySearchConditions(any(), any())).willReturn(reservations);
+        SearchConditionReservationDto condition = SearchConditionReservationDto.builder()
+                .date(LocalDate.now())
+                .build();
+
+        //when
+        Page<ReservationDto> reservationDtoPage = reservationService.getReservationsByCondition(condition, pageable);
+
+        //then
+        assertThat(reservationDtoPage.getContent())
+                .extracting("startDateTime", "endDateTime")
+                .containsExactlyInAnyOrder(
+                        tuple(startDateTime1, endDateTime2),
+                        tuple(startDateTime3, endDateTime4)
+                );
     }
 }
