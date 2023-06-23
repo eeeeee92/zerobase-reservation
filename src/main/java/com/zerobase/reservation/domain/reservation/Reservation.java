@@ -49,4 +49,8 @@ public class Reservation {
         this.endDateTime = endDateTime;
         this.arrivalStatus = ArrivalStatus.N;
     }
+
+    public void updateArrivalStatus(){
+        this.arrivalStatus = ArrivalStatus.Y;
+    }
 }

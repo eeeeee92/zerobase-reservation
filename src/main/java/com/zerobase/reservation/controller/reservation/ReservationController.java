@@ -1,6 +1,8 @@
 package com.zerobase.reservation.controller.reservation;
 
+import com.zerobase.reservation.dto.kiosk.KioskDto;
 import com.zerobase.reservation.dto.reservation.*;
+import com.zerobase.reservation.service.kiosk.KioskService;
 import com.zerobase.reservation.service.reservation.ReservationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,9 +12,11 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,6 +25,8 @@ import javax.validation.Valid;
 public class ReservationController {
 
     private final ReservationService reservationService;
+
+    private final KioskService kioskService;
 
     @PostMapping
     @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
@@ -55,4 +61,15 @@ public class ReservationController {
                 ReservationInfoDetailDto.Response.of(reservation)
         );
     }
+
+    @PutMapping("/{reservationCode}/arrival")
+    @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
+    public ResponseEntity<?> arrival(@PathVariable String reservationCode,
+                                     @RequestBody UpdateReservationArrivalDto.Request request) {
+
+        KioskDto kiosk = kioskService.getKiosk(request.getKioskCode());
+        reservationService.updateArrival(reservationCode, kiosk.getShop().getShopCode(), LocalDateTime.now());
+        return ResponseEntity.ok().build();
+    }
+
 }

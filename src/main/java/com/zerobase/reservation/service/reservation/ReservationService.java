@@ -6,6 +6,8 @@ import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.reservation.ReservationDto;
 import com.zerobase.reservation.dto.reservation.SearchConditionReservationDto;
 import com.zerobase.reservation.global.exception.ArgumentException;
+import com.zerobase.reservation.global.exception.ConflictException;
+import com.zerobase.reservation.global.exception.ErrorCode;
 import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.repository.reservation.ReservationRepository;
 import com.zerobase.reservation.repository.shop.ShopRepository;
@@ -14,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -22,6 +25,7 @@ import static com.zerobase.reservation.global.exception.ErrorCode.*;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -31,6 +35,7 @@ public class ReservationService {
     /**
      * 예약
      */
+    @Transactional
     public ReservationDto create(String email, String shopCode, LocalDateTime startDateTime, LocalDateTime endDateTime) {
 
         Member member = memberRepository.findByEmail(email)
@@ -69,6 +74,32 @@ public class ReservationService {
         return ReservationDto.of(reservation);
     }
 
+    @Transactional
+    public ReservationDto updateArrival(String reservationCode, String shopCode, LocalDateTime now) {
+        Reservation reservation = reservationRepository.findByReservationCode(reservationCode)
+                .orElseThrow(() -> new ArgumentException(RESERVATION_NOT_FOUND, reservationCode));
+
+        LocalDateTime arrivalTimeRange = getArrivalTimeRange(reservation.getStartDateTime());
+
+        if(arrivalTimeRange.isAfter(now) || now.isAfter(reservation.getEndDateTime())){
+            throw new ConflictException(INVALID_TIME, now.toString());
+        }
+
+        Shop shop = shopRepository.findByShopCode(shopCode)
+                .orElseThrow(() -> new ArgumentException(SHOP_NOT_FOUND, shopCode));
+
+        if(!reservation.getShop().getShopCode().equals(shop.getShopCode())){
+            throw new ArgumentException(UN_MATCH_SHOP_CODE, shopCode);
+        }
+
+        reservation.updateArrivalStatus();
+
+        return ReservationDto.of(reservation);
+    }
+
+    private LocalDateTime getArrivalTimeRange(LocalDateTime startTime) {
+        return startTime.minusMinutes(10);
+    }
 
     private static Reservation getReservation(LocalDateTime startDateTime, LocalDateTime endDateTime, Member member, Shop shop) {
         return Reservation.builder()
@@ -78,4 +109,5 @@ public class ReservationService {
                 .endDateTime(endDateTime)
                 .build();
     }
+
 }
