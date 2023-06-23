@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import static com.zerobase.reservation.global.exception.ErrorCode.INVALID_REQUEST;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.*;
 
 @Slf4j
 @RestControllerAdvice
@@ -33,6 +33,29 @@ public class GlobalExceptionHandler {
                 .status(BAD_REQUEST)
                 .errorCode(INVALID_REQUEST)
                 .errorMessage(e.getBindingResult().getAllErrors().get(0).getDefaultMessage())
+                .build();
+    }
+
+
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(ServerErrorException.class)
+    public ErrorResponse serverErrorException(ServerErrorException e) {
+        return ErrorResponse.builder()
+                .code(INTERNAL_SERVER_ERROR.value())
+                .status(INTERNAL_SERVER_ERROR)
+                .errorCode(e.getErrorCode())
+                .errorMessage(e.getErrorMessage())
+                .build();
+    }
+
+    @ResponseStatus(CONFLICT)
+    @ExceptionHandler(ConflictException.class)
+    public ErrorResponse conflictException(ConflictException e) {
+        return ErrorResponse.builder()
+                .code(BAD_REQUEST.value())
+                .status(BAD_REQUEST)
+                .errorCode(e.getErrorCode())
+                .errorMessage(e.getErrorMessage())
                 .build();
     }
 }
