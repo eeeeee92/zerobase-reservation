@@ -2,9 +2,13 @@ package com.zerobase.reservation.controller.reservation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerobase.reservation.domain.member.Member;
+import com.zerobase.reservation.domain.reservation.Reservation;
 import com.zerobase.reservation.domain.shop.Shop;
+import com.zerobase.reservation.dto.kiosk.KioskDto;
 import com.zerobase.reservation.dto.reservation.CreateReservationDto;
 import com.zerobase.reservation.dto.reservation.ReservationDto;
+import com.zerobase.reservation.dto.reservation.UpdateReservationArrivalDto;
+import com.zerobase.reservation.service.kiosk.KioskService;
 import com.zerobase.reservation.service.reservation.ReservationService;
 import com.zerobase.reservation.type.ArrivalStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -27,8 +31,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -44,6 +47,9 @@ class ReservationControllerTest {
 
     @MockBean
     private ReservationService reservationService;
+
+    @MockBean
+    private KioskService kioskService;
 
     @Test
     @DisplayName("예약")
@@ -204,6 +210,40 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.startDateTime").value(dateFormat(startDateTime)))
                 .andExpect(jsonPath("$.endDateTime").value(dateFormat(endDateTime)))
                 .andExpect(jsonPath("$.arrivalStatus").value(ArrivalStatus.N.getDescription()));
+
+    }
+
+
+    @Test
+    @DisplayName("방문 요청")
+    @WithMockUser
+    public void arrival() throws Exception {
+        //given
+        String email = "zerobase@naver.com";
+        String kioskCode = UUID.randomUUID().toString();
+
+        Reservation reservation = Reservation.builder().build();
+        UpdateReservationArrivalDto.Request request = UpdateReservationArrivalDto.Request.builder()
+                .email(email)
+                .kioskCode(kioskCode)
+                .build();
+        String json = objectMapper.writeValueAsString(request);
+
+        Shop shop = Shop.builder().build();
+
+        KioskDto kiosk = KioskDto.builder()
+                .shop(shop)
+                .build();
+
+        given(kioskService.getKiosk(any())).willReturn(kiosk);
+
+        //when //then
+        mockMvc.perform(put("/reservations/{reservationCode}/arrival", reservation.getReservationCode())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                ).andDo(print())
+                .andExpect(status().isOk());
 
     }
 

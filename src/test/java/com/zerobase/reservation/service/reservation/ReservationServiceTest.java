@@ -7,6 +7,7 @@ import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.reservation.ReservationDto;
 import com.zerobase.reservation.dto.reservation.SearchConditionReservationDto;
 import com.zerobase.reservation.global.exception.ArgumentException;
+import com.zerobase.reservation.global.exception.ConflictException;
 import com.zerobase.reservation.global.exception.ErrorCode;
 import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.repository.reservation.ReservationRepository;
@@ -243,5 +244,179 @@ class ReservationServiceTest {
         verify(reservationRepository, times(1)).findByReservationCode(any());
         assertThat(exception).extracting("errorCode", "errorMessage")
                 .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
+    }
+
+
+    @Test
+    @DisplayName("방문 요청")
+    public void updateArrival() throws Exception {
+        //given
+        Shop shop = Shop.builder().build();
+        Member member = Member.builder().build();
+        LocalDateTime startDateTime = LocalDateTime.now();
+        LocalDateTime endDateTime = LocalDateTime.now().plusHours(1);
+        Reservation reservation = Reservation.builder()
+                .shop(shop)
+                .member(member)
+                .startDateTime(startDateTime)
+                .endDateTime(endDateTime)
+                .build();
+        given(reservationRepository.findByReservationCode(any()))
+                .willReturn(Optional.of(reservation));
+        given(shopRepository.findByShopCode(any()))
+                .willReturn(Optional.of(shop));
+
+        //when
+        LocalDateTime now = LocalDateTime.now().minusMinutes(5);
+        ReservationDto reservationDto =
+                reservationService.updateArrival(reservation.getReservationCode(), shop.getShopCode(), now);
+
+        //then
+        verify(reservationRepository, times(1)).findByReservationCode(any());
+        verify(shopRepository, times(1)).findByShopCode(any());
+        assertThat(reservationDto).extracting("reservationCode", "startDateTime", "endDateTime", "arrivalStatus")
+                .contains(reservation.getReservationCode(), startDateTime, endDateTime, ArrivalStatus.Y);
+        assertNotNull(reservationDto.getMember());
+        assertNotNull(reservationDto.getShop());
+    }
+
+    @Test
+    @DisplayName("방문 요청시 예약이 존재하지 않으면 예외가 발생한다")
+    public void updateArrival_reservationNotFound() throws Exception {
+        //given
+        Shop shop = Shop.builder().build();
+        Member member = Member.builder().build();
+        Reservation reservation = Reservation.builder()
+                .shop(shop)
+                .member(member)
+                .build();
+        ArgumentException argumentException = new ArgumentException(ErrorCode.RESERVATION_NOT_FOUND, reservation.getReservationCode());
+        given(reservationRepository.findByReservationCode(any()))
+                .willReturn(Optional.empty());
+        //when //then
+        verify(reservationRepository, times(1)).findByReservationCode(any());
+        ArgumentException exception = assertThrows(ArgumentException.class,
+                () -> reservationService.updateArrival(reservation.getReservationCode(), shop.getShopCode(), LocalDateTime.now()));
+
+        assertThat(exception).extracting("errorCode", "errorMessage")
+                .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
+    }
+
+    @Test
+    @DisplayName("방문 요청시 예약시간 10분전보다 이전에 요청하면 예외가 발생한다")
+    public void updateArrival_invalidTimeBefore() throws Exception {
+        //given
+        Shop shop = Shop.builder().build();
+        Member member = Member.builder().build();
+        LocalDateTime startDateTime = LocalDateTime.now();
+        LocalDateTime endDateTime = LocalDateTime.now().plusHours(1);
+
+        LocalDateTime now = LocalDateTime.now().minusMinutes(11);
+        Reservation reservation = Reservation.builder()
+                .shop(shop)
+                .member(member)
+                .startDateTime(startDateTime)
+                .endDateTime(endDateTime)
+                .build();
+        ConflictException conflictException = new ConflictException(ErrorCode.INVALID_TIME, now.toString());
+        given(reservationRepository.findByReservationCode(any()))
+                .willReturn(Optional.of(reservation));
+        //when //then
+
+        ConflictException exception = assertThrows(ConflictException.class, () ->
+                reservationService.updateArrival(reservation.getReservationCode(), shop.getShopCode(), now));
+
+        assertThat(exception).extracting("errorCode", "errorMessage")
+                .contains(conflictException.getErrorCode(), conflictException.getErrorMessage());
+    }
+
+    @Test
+    @DisplayName("방문 요청시 이용시간 이후에 요청하면 예외가 발생한다")
+    public void updateArrival_invalidTimeAfter() throws Exception {
+        //given
+        Shop shop = Shop.builder().build();
+        Member member = Member.builder().build();
+        LocalDateTime startDateTime = LocalDateTime.now();
+        LocalDateTime endDateTime = LocalDateTime.now().plusHours(1);
+
+        LocalDateTime now = LocalDateTime.now().plusHours(1).plusMinutes(1);
+        Reservation reservation = Reservation.builder()
+                .shop(shop)
+                .member(member)
+                .startDateTime(startDateTime)
+                .endDateTime(endDateTime)
+                .build();
+        ConflictException conflictException = new ConflictException(ErrorCode.INVALID_TIME, now.toString());
+        given(reservationRepository.findByReservationCode(any()))
+                .willReturn(Optional.of(reservation));
+        //when //then
+
+        ConflictException exception = assertThrows(ConflictException.class, () ->
+                reservationService.updateArrival(reservation.getReservationCode(), shop.getShopCode(), now));
+
+        assertThat(exception).extracting("errorCode", "errorMessage")
+                .contains(conflictException.getErrorCode(), conflictException.getErrorMessage());
+    }
+
+    @Test
+    @DisplayName("방문 요청시 이용시간 이후에 요청하면 예외가 발생한다")
+    public void updateArrival_shopNotFound() throws Exception {
+        //given
+        Shop shop = Shop.builder().build();
+        Member member = Member.builder().build();
+        LocalDateTime startDateTime = LocalDateTime.now();
+        LocalDateTime endDateTime = LocalDateTime.now().plusHours(1);
+
+        LocalDateTime now = LocalDateTime.now().minusMinutes(5);
+        Reservation reservation = Reservation.builder()
+                .shop(shop)
+                .member(member)
+                .startDateTime(startDateTime)
+                .endDateTime(endDateTime)
+                .build();
+        ArgumentException conflictException = new ArgumentException(ErrorCode.SHOP_NOT_FOUND, shop.getShopCode());
+        given(reservationRepository.findByReservationCode(any()))
+                .willReturn(Optional.of(reservation));
+        given(shopRepository.findByShopCode(any())).willReturn(Optional.empty());
+        //when //then
+
+        ArgumentException exception = assertThrows(ArgumentException.class, () ->
+                reservationService.updateArrival(reservation.getReservationCode(), shop.getShopCode(), now));
+
+        assertThat(exception).extracting("errorCode", "errorMessage")
+                .contains(conflictException.getErrorCode(), conflictException.getErrorMessage());
+    }
+
+    @Test
+    @DisplayName("방문 요청시 예약된 상점과 요청한 상점이 다르면 예외가 발생한다")
+    public void updateArrival_unMatchShopCode() throws Exception {
+        //given
+        Shop shop = Shop.builder()
+                .build();
+        Shop anotherShop = Shop.builder()
+                .build();
+        Member member = Member.builder().build();
+        LocalDateTime startDateTime = LocalDateTime.now();
+        LocalDateTime endDateTime = LocalDateTime.now().plusHours(1);
+
+        LocalDateTime now = LocalDateTime.now().minusMinutes(5);
+        String parameterShopCode = UUID.randomUUID().toString();
+        Reservation reservation = Reservation.builder()
+                .shop(shop)
+                .member(member)
+                .startDateTime(startDateTime)
+                .endDateTime(endDateTime)
+                .build();
+        ArgumentException conflictException = new ArgumentException(ErrorCode.UN_MATCH_SHOP_CODE, anotherShop.getShopCode());
+        given(reservationRepository.findByReservationCode(any()))
+                .willReturn(Optional.of(reservation));
+        given(shopRepository.findByShopCode(any())).willReturn(Optional.of(anotherShop));
+        //when //then
+
+        ArgumentException exception = assertThrows(ArgumentException.class, () ->
+                reservationService.updateArrival(reservation.getReservationCode(), anotherShop.getShopCode(), now));
+
+        assertThat(exception).extracting("errorCode", "errorMessage")
+                .contains(conflictException.getErrorCode(), conflictException.getErrorMessage());
     }
 }
