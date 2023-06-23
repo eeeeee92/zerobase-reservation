@@ -16,6 +16,8 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.UUID;
+
 import static com.zerobase.reservation.global.exception.ErrorCode.INVALID_REQUEST;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -116,13 +118,13 @@ public class ShopControllerTest {
     @WithMockUser
     public void read() throws Exception {
         //given
-        Long shopId = 1L;
         String name = "샵1";
         double rating = 5.0;
         double latitude = 12.0;
         double longitude = 12.1;
+        String shopCode = UUID.randomUUID().toString();
         given(shopService.getShop(any())).willReturn(ShopDto.builder()
-                        .id(shopId)
+                        .shopCode(shopCode)
                         .name(name)
                         .rating(rating)
                         .latitude(latitude)
@@ -130,12 +132,12 @@ public class ShopControllerTest {
                 .build());
 
         //when //then
-        mockMvc.perform(MockMvcRequestBuilders.get("/shops/{shopId}",shopId)
+        mockMvc.perform(MockMvcRequestBuilders.get("/shops/{shopCode}", shopCode)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(shopId))
+                .andExpect(jsonPath("$.shopCode").value(shopCode))
                 .andExpect(jsonPath("$.name").value(name))
                 .andExpect(jsonPath("$.rating").value(rating))
                 .andExpect(jsonPath("$.latitude").value(latitude))

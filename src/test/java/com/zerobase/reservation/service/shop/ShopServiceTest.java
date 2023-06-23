@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -52,36 +53,27 @@ class ShopServiceTest {
                 .email(email)
                 .build();
 
-        Shop shop = getShopEntity(name, latitude, longitude);
+        Shop shop = getShopEntity(name, latitude, longitude, 0);
 
         given(memberRepository.findByEmail(email)).willReturn(Optional.of(member));
         given(memberShopRepository.save(any())).willReturn(MemberShop.builder()
-                        .member(member)
-                        .shop(shop)
+                .member(member)
+                .shop(shop)
                 .build());
         given(shopRepository.save(any())).willReturn(shop);
-
         //when
         ShopDto dto = shopService.createShop(email, name, latitude, longitude);
 
         //then
         verify(memberRepository, times(1)).findByEmail(any());
         verify(memberShopRepository, times(1)).save(any());
+        verify(shopRepository, times(1)).save(any());
 
         assertThat(dto)
-                .extracting("name", "latitude", "longitude")
-                .contains(name, latitude, longitude);
-
+                .extracting("shopCode", "name", "latitude", "longitude")
+                .contains(shop.getShopCode(), name, latitude, longitude);
     }
 
-    private static Shop getShopEntity(String name, Double latitude, Double longitude) {
-        return Shop.builder()
-                .name(name)
-                .rating(1.0)
-                .longitude(latitude)
-                .latitude(longitude)
-                .build();
-    }
 
     @Test
     @DisplayName("상점을 등록할 때 회원이 존재하지 않으면 예외가 발생한다.")
@@ -111,17 +103,18 @@ class ShopServiceTest {
         double latitude = 12.0;
         double longitude = 12.1;
         double rating = 1.0;
-        given(shopRepository.findById(any())).willReturn(
+        String shopCode = UUID.randomUUID().toString();
+        given(shopRepository.findByShopCode(any())).willReturn(
                 Optional.of(
                         getShopEntity(name, latitude, longitude, rating))
         );
-
         //when
-        ShopDto shopDto = shopService.getShop(1L);
+        ShopDto shopDto = shopService.getShop(shopCode);
 
         //then
-        assertThat(shopDto).extracting("name", "latitude", "longitude", "rating")
-                .contains(name, latitude, longitude, rating);
+        verify(shopRepository, times(1)).findByShopCode(any());
+        assertThat(shopDto).extracting("shopCode", "name", "latitude", "longitude", "rating")
+                .contains(shopDto.getShopCode(), name, latitude, longitude, rating);
 
     }
 
@@ -130,12 +123,12 @@ class ShopServiceTest {
     @DisplayName("상점 상세조회시 상점이 존재하지 않으면 예외가 발생한다.")
     public void getShop_ShopNotFound() throws Exception {
         //given
-        Long shopId = 1L;
+        String shopCode = UUID.randomUUID().toString();
         given(shopRepository.findById(any())).willReturn(Optional.empty());
-        ArgumentException argumentException = new ArgumentException(ErrorCode.SHOP_NOT_FOUND, String.valueOf(shopId));
+        ArgumentException argumentException = new ArgumentException(ErrorCode.SHOP_NOT_FOUND, shopCode);
 
         //when //then
-        ArgumentException exception = assertThrows(ArgumentException.class, () -> shopService.getShop(shopId));
+        ArgumentException exception = assertThrows(ArgumentException.class, () -> shopService.getShop(shopCode));
         assertThat(exception)
                 .extracting("errorCode", "errorMessage")
                 .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());

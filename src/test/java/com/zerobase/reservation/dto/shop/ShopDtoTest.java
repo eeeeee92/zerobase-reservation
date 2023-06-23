@@ -19,7 +19,7 @@ class ShopDtoTest {
         //when
         ShopDto shopDto = ShopDto.of(shop);
         //then
-        assertThat(shopDto).extracting("id", "name", "latitude", "longitude", "rating")
-                .contains(null, "샵1", 12.0, 12.1, null);
+        assertThat(shopDto).extracting("shopCode", "name", "latitude", "longitude", "rating")
+                .contains(shop.getShopCode(), "샵1", 12.0, 12.1, null);
     }
 }
