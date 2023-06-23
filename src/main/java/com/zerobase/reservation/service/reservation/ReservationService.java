@@ -31,31 +31,42 @@ public class ReservationService {
     /**
      * 예약
      */
-    public ReservationDto create(String email, Long shopId, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+    public ReservationDto create(String email, String shopCode, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new ArgumentException(MEMBER_NOT_FOUND, email));
+        Shop shop = shopRepository.findByShopCode(shopCode)
+                .orElseThrow(() -> new ArgumentException(SHOP_NOT_FOUND, shopCode));
+
         if (endDateTime.isBefore(startDateTime)) {
             throw new ArgumentException(END_TIME_MUST_BE_AFTER_START_TIME, String.format("start[%s], end[%s]", startDateTime, endDateTime));
         }
 
 
-        if (reservationRepository.confirmReservation((startDateTime.plusSeconds(1)), endDateTime, shopId).isPresent()) {
+        if (reservationRepository.confirmReservation((startDateTime.plusSeconds(1)), endDateTime, shop).isPresent()) {
             throw new ArgumentException(ALREADY_EXIST_RESERVATION,
                     String.format("%s or %s", startDateTime, endDateTime));
         }
-
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new ArgumentException(MEMBER_NOT_FOUND, email));
-        Shop shop = shopRepository.findById(shopId)
-                .orElseThrow(() -> new ArgumentException(SHOP_NOT_FOUND, String.valueOf(shopId)));
-
 
         Reservation reservation = reservationRepository.save(getReservation(startDateTime, endDateTime, member, shop));
         return ReservationDto.of(reservation);
     }
 
-    /** 예약 확인 */
-    public Page<ReservationDto> getReservationsByCondition(SearchConditionReservationDto condition, Pageable pageable){
+    /**
+     * 예약 확인
+     */
+    public Page<ReservationDto> getReservationsByCondition(SearchConditionReservationDto condition, Pageable pageable) {
         return reservationRepository.findAllBySearchConditions(condition, pageable)
                 .map(ReservationDto::of);
+    }
+
+    /**
+     * 예약 상세조회
+     */
+    public ReservationDto getReservation(String reservationCode) {
+        Reservation reservation = reservationRepository.findByReservationCode(reservationCode).
+                orElseThrow(() -> new ArgumentException(RESERVATION_NOT_FOUND, reservationCode));
+        return ReservationDto.of(reservation);
     }
 
 

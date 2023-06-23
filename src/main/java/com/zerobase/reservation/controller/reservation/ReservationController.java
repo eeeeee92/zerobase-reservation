@@ -1,8 +1,6 @@
 package com.zerobase.reservation.controller.reservation;
 
-import com.zerobase.reservation.dto.reservation.CreateReservationDto;
-import com.zerobase.reservation.dto.reservation.ReservationInfoDto;
-import com.zerobase.reservation.dto.reservation.SearchConditionReservationDto;
+import com.zerobase.reservation.dto.reservation.*;
 import com.zerobase.reservation.service.reservation.ReservationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +17,7 @@ import javax.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/reservation")
+@RequestMapping("/reservations")
 public class ReservationController {
 
     private final ReservationService reservationService;
@@ -29,7 +28,7 @@ public class ReservationController {
 
         reservationService.create(
                 request.getEmail(),
-                request.getShopId(),
+                request.getShopCode(),
                 request.getStartDateTime(),
                 request.getEndDateTime()
         );
@@ -44,6 +43,16 @@ public class ReservationController {
         return ResponseEntity.ok(
                 reservationService.getReservationsByCondition(request, pageable)
                         .map(ReservationInfoDto.Response::of)
+        );
+    }
+
+    @GetMapping("/{reservationCode}")
+    @PreAuthorize("isAuthenticated() and (hasRole('USER') or (hasRole('SELLER')))")
+    @PostAuthorize("returnObject.body.reservationEmail == principal.username or hasRole('SELLER')")
+    public ResponseEntity<ReservationInfoDetailDto.Response> read(@PathVariable String reservationCode) {
+        ReservationDto reservation = reservationService.getReservation(reservationCode);
+        return ResponseEntity.ok(
+                ReservationInfoDetailDto.Response.of(reservation)
         );
     }
 }
