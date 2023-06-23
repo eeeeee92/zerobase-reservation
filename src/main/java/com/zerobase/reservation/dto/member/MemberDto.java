@@ -6,9 +6,10 @@ import com.zerobase.reservation.type.SocialType;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@Builder(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberDto {
 
     private String email;
@@ -34,7 +35,7 @@ public class MemberDto {
         this.refreshToken = refreshToken;
     }
 
-    public static MemberDto of(Member member){
+    public static MemberDto of(Member member) {
         return MemberDto.builder()
                 .email(member.getEmail())
                 .password(member.getPassword())
