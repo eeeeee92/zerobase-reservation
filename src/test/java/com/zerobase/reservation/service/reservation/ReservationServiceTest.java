@@ -12,7 +12,6 @@ import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.repository.reservation.ReservationRepository;
 import com.zerobase.reservation.repository.shop.ShopRepository;
 import com.zerobase.reservation.type.ArrivalStatus;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +25,16 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @AcceptanceTest
 class ReservationServiceTest {
@@ -67,17 +71,23 @@ class ReservationServiceTest {
                 .endDateTime(endDateTime)
                 .build();
         given(memberRepository.findByEmail(email)).willReturn(Optional.of(member));
-        given(shopRepository.findById(any())).willReturn(Optional.of(shop));
+        given(shopRepository.findByShopCode(any())).willReturn(Optional.of(shop));
         given(reservationRepository.save(any())).willReturn(reservation);
 
         //when
-        ReservationDto reservationDto = reservationService.create(email, 1L, startDateTime, endDateTime);
+        ReservationDto reservationDto = reservationService.create(email, shop.getShopCode(), startDateTime, endDateTime);
 
         //then
+        verify(memberRepository, times(1)).findByEmail(any());
+        verify(shopRepository, times(1)).findByShopCode(any());
+        verify(reservationRepository, times(1)).confirmReservation(any(), any(), any());
+        verify(reservationRepository, times(1)).save(any());
+
+
         assertThat(reservationDto.getMember()).isNotNull();
         assertThat(reservationDto.getShop()).isNotNull();
-        assertThat(reservationDto).extracting("startDateTime", "endDateTime", "arrivalStatus")
-                .contains(startDateTime, endDateTime, ArrivalStatus.N);
+        assertThat(reservationDto).extracting("reservationCode", "startDateTime", "endDateTime", "arrivalStatus")
+                .contains(reservation.getReservationCode(), startDateTime, endDateTime, ArrivalStatus.N);
 
     }
 
@@ -86,17 +96,27 @@ class ReservationServiceTest {
     public void create_mustBeAfterStart() throws Exception {
         //given
         String email = "zerobase@naver.com";
+        Member member = Member.builder()
+                .email(email)
+                .build();
+        Shop shop = Shop.builder()
+                .name("shop1")
+                .build();
 
 
         LocalDateTime startDateTime = LocalDateTime.of(2022, 5, 23, 12, 0);
         LocalDateTime endDateTime = LocalDateTime.of(2022, 5, 23, 11, 59);
+        String shopCode = UUID.randomUUID().toString();
 
+        given(memberRepository.findByEmail(email)).willReturn(Optional.of(member));
+        given(shopRepository.findByShopCode(any())).willReturn(Optional.of(shop));
 
         ArgumentException argumentException =
                 new ArgumentException(ErrorCode.END_TIME_MUST_BE_AFTER_START_TIME, String.format("start[%s], end[%s]", startDateTime, endDateTime));
 
+
         //when //then
-        ArgumentException exception = Assertions.assertThrows(ArgumentException.class, () -> reservationService.create(email, 1L, startDateTime, endDateTime));
+        ArgumentException exception = assertThrows(ArgumentException.class, () -> reservationService.create(email, shopCode, startDateTime, endDateTime));
         assertThat(exception).extracting("errorCode", "errorMessage")
                 .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
     }
@@ -115,7 +135,7 @@ class ReservationServiceTest {
 
         LocalDateTime startDateTime = LocalDateTime.of(2022, 5, 23, 12, 0);
         LocalDateTime endDateTime = LocalDateTime.of(2022, 5, 26, 12, 0);
-
+        String shopCode = UUID.randomUUID().toString();
         Reservation reservation = Reservation.builder()
                 .member(member)
                 .shop(shop)
@@ -123,12 +143,12 @@ class ReservationServiceTest {
                 .endDateTime(endDateTime)
                 .build();
         given(memberRepository.findByEmail(email)).willReturn(Optional.of(member));
-        given(shopRepository.findById(any())).willReturn(Optional.of(shop));
+        given(shopRepository.findByShopCode(any())).willReturn(Optional.of(shop));
         given(reservationRepository.confirmReservation(any(), any(), any())).willReturn(Optional.of(reservation));
         ArgumentException argumentException = new ArgumentException(ErrorCode.ALREADY_EXIST_RESERVATION, String.format("%s or %s", startDateTime, endDateTime));
 
         //when //then
-        ArgumentException exception = Assertions.assertThrows(ArgumentException.class, () -> reservationService.create(email, 1L, startDateTime, endDateTime));
+        ArgumentException exception = assertThrows(ArgumentException.class, () -> reservationService.create(email, shopCode, startDateTime, endDateTime));
         assertThat(exception).extracting("errorCode", "errorMessage")
                 .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
 
@@ -171,5 +191,57 @@ class ReservationServiceTest {
                         tuple(startDateTime1, endDateTime2),
                         tuple(startDateTime3, endDateTime4)
                 );
+    }
+
+    @Test
+    @DisplayName("예약 상세조회")
+    public void getReservation() throws Exception {
+        //given
+        Member member = Member.builder()
+                .build();
+        Shop shop = Shop.builder()
+                .build();
+        LocalDateTime startDateTime = LocalDateTime.of(2022, 05, 23, 12, 0);
+        LocalDateTime endDateTime = LocalDateTime.of(2022, 05, 23, 13, 0);
+
+        Reservation reservation = Reservation.builder()
+                .member(member)
+                .shop(shop)
+                .startDateTime(startDateTime)
+                .endDateTime(endDateTime)
+                .build();
+
+        given(reservationRepository.findByReservationCode(any()))
+                .willReturn(Optional.of(reservation));
+
+        //when
+        ReservationDto reservationDto = reservationService.getReservation(reservation.getReservationCode());
+
+        //then
+        verify(reservationRepository, times(1)).findByReservationCode(any());
+        assertThat(reservationDto)
+                .extracting("reservationCode", "startDateTime", "endDateTime", "arrivalStatus")
+                .contains(reservation.getReservationCode(), startDateTime, endDateTime, ArrivalStatus.N);
+        assertNotNull(reservationDto.getMember());
+        assertNotNull(reservationDto.getShop());
+
+    }
+
+    @Test
+    @DisplayName("예약상세조회시 예약이 존재하지 않으면 예외가 발생한다")
+    public void getReservation_reservationNotFound() throws Exception {
+
+        String reservationCode = UUID.randomUUID().toString();
+
+        //given
+        given((reservationRepository.findByReservationCode(any()))).willReturn(Optional.empty());
+        ArgumentException argumentException = new ArgumentException(ErrorCode.RESERVATION_NOT_FOUND, reservationCode);
+
+        //when //then
+        ArgumentException exception = assertThrows(ArgumentException.class, () -> reservationService.getReservation(reservationCode));
+
+        verify(reservationRepository, times(1)).findByReservationCode(any());
+        assertThat(exception).extracting("errorCode", "errorMessage")
+                .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
     }
 }

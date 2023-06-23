@@ -20,8 +20,10 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -50,16 +52,17 @@ class ReservationControllerTest {
         //given
         LocalDateTime startDateTime = LocalDateTime.now().plusSeconds(1);
         LocalDateTime endDateTime = LocalDateTime.now().plusSeconds(1);
+        String shopCode = UUID.randomUUID().toString();
         CreateReservationDto.Request request = CreateReservationDto.Request.builder()
                 .email("zerobase@naver.com")
-                .shopId(1L)
+                .shopCode(shopCode)
                 .startDateTime(startDateTime)
                 .endDateTime(endDateTime)
                 .build();
         String json = objectMapper.writeValueAsString(request);
 
         //when //then
-        mockMvc.perform(post("/reservation")
+        mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -73,7 +76,7 @@ class ReservationControllerTest {
     public void readAllByCondition() throws Exception {
         //given
         String email = "zerobase@naver.com";
-        String shopId = "1";
+        String shopCode = UUID.randomUUID().toString();
         String date = "2022-05-23";
 
         LocalDateTime startDateTime1 = LocalDateTime.now().plusDays(1);
@@ -98,8 +101,11 @@ class ReservationControllerTest {
                 .longitude(longitude)
                 .build();
 
+        String reservationCode1 = UUID.randomUUID().toString();
+        String reservationCode2 = UUID.randomUUID().toString();
+
         ReservationDto reservation = ReservationDto.builder()
-                .id(1L)
+                .reservationCode(reservationCode1)
                 .member(member)
                 .shop(shop)
                 .arrivalStatus(ArrivalStatus.N)
@@ -107,7 +113,7 @@ class ReservationControllerTest {
                 .endDateTime(endDateTime2)
                 .build();
         ReservationDto reservation1 = ReservationDto.builder()
-                .id(2L)
+                .reservationCode(reservationCode2)
                 .member(member)
                 .shop(shop)
                 .arrivalStatus(ArrivalStatus.N)
@@ -121,18 +127,19 @@ class ReservationControllerTest {
         given(reservationService.getReservationsByCondition(any(), any())).willReturn(reservations);
 
         //when //then
-        mockMvc.perform(get("/reservation")
+        mockMvc.perform(get("/reservations")
                         .param("email", email)
-                        .param("shopId", shopId)
+                        .param("shopCode", shopCode)
                         .param("date", date)
                         .param("page", "0")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                 ).andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id").value(1L))
+                .andExpect(jsonPath("$.content[0].reservationCode").value(reservation.getReservationCode()))
                 .andExpect(jsonPath("$.content[0].reservationEmail").value(email))
                 .andExpect(jsonPath("$.content[0].nickname").value(nickname))
                 .andExpect(jsonPath("$.content[0].phoneNumber").value(phoneNumber))
+                .andExpect(jsonPath("$.content[0].shopCode").value(shop.getShopCode()))
                 .andExpect(jsonPath("$.content[0].shopName").value(shopName))
                 .andExpect(jsonPath("$.content[0].latitude").value(latitude))
                 .andExpect(jsonPath("$.content[0].longitude").value(longitude))
@@ -140,5 +147,67 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.content[0].startDateTime").value(startDateTime1.toString()))
                 .andExpect(jsonPath("$.content[0].endDateTime").value(endDateTime2.toString()));
 
+    }
+
+
+    @Test
+    @DisplayName("예약 상세조회")
+    @WithMockUser
+    public void read() throws Exception {
+        //given
+
+        String email = "zerobase@naver.com";
+        String nickname = "zerobase";
+        String phoneNumber = "01000000000";
+        Member member = Member.builder()
+                .email(email)
+                .nickname(nickname)
+                .phoneNumber(phoneNumber)
+                .build();
+        String shopName = "shop";
+        double latitude = 12.0;
+        double longitude = 12.1;
+        Shop shop = Shop.builder()
+                .name(shopName)
+                .latitude(latitude)
+                .longitude(longitude)
+                .build();
+
+        String reservationCode = UUID.randomUUID().toString();
+        LocalDateTime startDateTime = LocalDateTime.of(2022, 05, 23, 12, 0, 0, 0);
+        LocalDateTime endDateTime = LocalDateTime.of(2022, 05, 23, 13, 0, 0, 0);
+        ReservationDto reservationDto = ReservationDto.builder()
+                .reservationCode(reservationCode)
+                .member(member)
+                .shop(shop)
+                .startDateTime(startDateTime)
+                .endDateTime(endDateTime)
+                .arrivalStatus(ArrivalStatus.N)
+                .build();
+
+        given(reservationService.getReservation(any()))
+                .willReturn(reservationDto);
+
+        //when //then
+        mockMvc.perform(get("/reservations/{reservationCode}", reservationCode)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reservationCode").value(reservationCode))
+                .andExpect(jsonPath("$.reservationEmail").value(email))
+                .andExpect(jsonPath("$.nickname").value(nickname))
+                .andExpect(jsonPath("$.phoneNumber").value(phoneNumber))
+                .andExpect(jsonPath("$.shopCode").value(shop.getShopCode()))
+                .andExpect(jsonPath("$.shopName").value(shopName))
+                .andExpect(jsonPath("$.latitude").value(latitude))
+                .andExpect(jsonPath("$.longitude").value(longitude))
+                .andExpect(jsonPath("$.startDateTime").value(dateFormat(startDateTime)))
+                .andExpect(jsonPath("$.endDateTime").value(dateFormat(endDateTime)))
+                .andExpect(jsonPath("$.arrivalStatus").value(ArrivalStatus.N.getDescription()));
+
+    }
+
+    private static String dateFormat(LocalDateTime dateTime) {
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss").format(dateTime);
     }
 }
