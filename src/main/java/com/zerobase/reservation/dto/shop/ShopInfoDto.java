@@ -9,7 +9,7 @@ public class ShopInfoDto {
     @NoArgsConstructor
     public static class Response {
 
-        private Long id;
+        private String shopCode;
 
         private String name;
 
@@ -20,8 +20,8 @@ public class ShopInfoDto {
         private Double longitude;
 
         @Builder
-        private Response(Long id, String name, Double rating, Double latitude, Double longitude) {
-            this.id = id;
+        private Response(String shopCode, String name, Double rating, Double latitude, Double longitude) {
+            this.shopCode = shopCode;
             this.name = name;
             this.rating = rating;
             this.latitude = latitude;
@@ -30,7 +30,7 @@ public class ShopInfoDto {
 
         public static Response of(ShopDto shopDto) {
             return Response.builder()
-                    .id(shopDto.getId())
+                    .shopCode(shopDto.getShopCode())
                     .name(shopDto.getName())
                     .rating(shopDto.getRating())
                     .latitude(shopDto.getLatitude())

@@ -23,14 +23,13 @@ public class ShopController {
     @PostMapping
     @PreAuthorize("isAuthenticated() and (hasRole('SELLER'))")
     public ResponseEntity<?> create(@Valid @RequestBody CreateShopDto.Request request) {
-        log.info("{}", request);
         shopService.createShop(request.getEmail(), request.getName(), request.getLatitude(), request.getLongitude());
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{shopId}")
-    public ResponseEntity<ShopInfoDto.Response> read(@PathVariable Long shopId) {
-        ShopDto shopDto = shopService.getShop(shopId);
+    @GetMapping("/{shopCode}")
+    public ResponseEntity<ShopInfoDto.Response> read(@PathVariable String shopCode) {
+        ShopDto shopDto = shopService.getShop(shopCode);
         return ResponseEntity.ok(
                 ShopInfoDto.Response.of(shopDto)
         );

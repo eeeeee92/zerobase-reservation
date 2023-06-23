@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static com.zerobase.reservation.global.exception.ErrorCode.MEMBER_NOT_FOUND;
 import static com.zerobase.reservation.global.exception.ErrorCode.SHOP_NOT_FOUND;
-import static java.lang.String.valueOf;
 
 @Service
 @Slf4j
@@ -43,9 +42,9 @@ public class ShopService {
     /**
      * 상점 상세 조회
      */
-    public ShopDto getShop(Long shopId) {
-        Shop findShop = shopRepository.findById(shopId)
-                .orElseThrow(() -> new ArgumentException(SHOP_NOT_FOUND, valueOf(shopId)));
+    public ShopDto getShop(String shopCode) {
+        Shop findShop = shopRepository.findByShopCode(shopCode)
+                .orElseThrow(() -> new ArgumentException(SHOP_NOT_FOUND, shopCode));
         return ShopDto.of(findShop);
     }
 

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -19,6 +20,9 @@ public class Shop {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "shop_id")
     private Long id;
+
+    @Column(unique = true)
+    private String shopCode;
 
     private String name;
 
@@ -39,10 +43,12 @@ public class Shop {
 
     @Builder
     private Shop(String name, Double latitude, Double longitude, Double rating) {
+        this.shopCode = UUID.randomUUID().toString();
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
         this.rating = rating;
+
     }
 
 }

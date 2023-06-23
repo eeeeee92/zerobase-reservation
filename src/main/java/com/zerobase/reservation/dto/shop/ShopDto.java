@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ShopDto {
 
-    private Long id;
+    private String shopCode;
 
     private String name;
 
@@ -21,8 +21,8 @@ public class ShopDto {
     private Double longitude;
 
     @Builder
-    private ShopDto(Long id, String name, Double rating, Double latitude, Double longitude) {
-        this.id = id;
+    private ShopDto(String shopCode, String name, Double rating, Double latitude, Double longitude) {
+        this.shopCode = shopCode;
         this.name = name;
         this.rating = rating;
         this.latitude = latitude;
@@ -31,7 +31,7 @@ public class ShopDto {
 
     public static ShopDto of(Shop shop) {
         return ShopDto.builder()
-                .id(shop.getId())
+                .shopCode(shop.getShopCode())
                 .name(shop.getName())
                 .rating(shop.getRating())
                 .latitude(shop.getLatitude())
