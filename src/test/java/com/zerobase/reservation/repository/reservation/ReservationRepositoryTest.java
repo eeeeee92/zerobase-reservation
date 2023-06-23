@@ -5,6 +5,7 @@ import com.zerobase.reservation.domain.reservation.Reservation;
 import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.repository.shop.ShopRepository;
+import com.zerobase.reservation.type.ArrivalStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 class ReservationRepositoryTest {
@@ -34,25 +37,57 @@ class ReservationRepositoryTest {
         Shop shop = Shop.builder()
                 .name("shop1")
                 .build();
-        LocalDateTime startDateTime = LocalDateTime.of(2022, 05, 29, 0,0);
-        LocalDateTime endDateTime = LocalDateTime.of(2022, 06, 5, 0,0);
+        LocalDateTime startDateTime = LocalDateTime.of(2022, 05, 29, 0, 0);
+        LocalDateTime endDateTime = LocalDateTime.of(2022, 06, 5, 0, 0);
         Reservation reservation = Reservation.builder()
                 .member(member)
                 .shop(shop)
                 .startDateTime(startDateTime)
                 .endDateTime(endDateTime)
                 .build();
-        LocalDateTime wantStartDate = LocalDateTime.of(2022, 6, 5, 0, 0,1);
+        LocalDateTime wantStartDate = LocalDateTime.of(2022, 6, 5, 0, 0, 1);
         LocalDateTime wantEndDate = LocalDateTime.of(2022, 6, 6, 12, 0);
         memberRepository.save(member);
         Shop saveShop = shopRepository.save(shop);
         reservationRepository.save(reservation);
 
         //when
-        Optional<Reservation> reservation1 = reservationRepository.confirmReservation(wantStartDate, wantEndDate, saveShop.getId());
+        Optional<Reservation> reservation1 = reservationRepository.confirmReservation(wantStartDate, wantEndDate, shop);
 
         //then
         Assertions.assertTrue(reservation1.isEmpty());
+
+    }
+
+    @Test
+    public void findByReservationCode() throws Exception {
+        //given
+        Member member = Member.builder()
+                .build();
+        Shop shop = Shop.builder()
+                .build();
+        LocalDateTime startDateTime = LocalDateTime.of(2022, 05, 23, 12, 0);
+        LocalDateTime endDateTime = LocalDateTime.of(2022, 05, 23, 13, 0);
+
+
+        Reservation reservation = Reservation.builder()
+                .member(member)
+                .shop(shop)
+                .startDateTime(startDateTime)
+                .endDateTime(endDateTime)
+                .build();
+
+        memberRepository.save(member);
+        shopRepository.save(shop);
+        Reservation saveReservation = reservationRepository.save(reservation);
+
+        //when
+        Reservation findReservation = reservationRepository.findByReservationCode(saveReservation.getReservationCode())
+                .orElse(null);
+
+        //then
+        assertThat(findReservation).extracting("reservationCode", "startDateTime", "endDateTime", "arrivalStatus")
+                .contains(reservation.getReservationCode(), startDateTime, endDateTime, ArrivalStatus.N);
 
     }
 }

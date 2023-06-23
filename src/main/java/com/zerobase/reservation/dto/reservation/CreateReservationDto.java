@@ -17,7 +17,7 @@ public class CreateReservationDto {
     public static class Request {
         @Email
         private String email;
-        private Long shopId;
+        private String shopCode;
 
         @Future
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -27,9 +27,9 @@ public class CreateReservationDto {
         private LocalDateTime endDateTime;
 
         @Builder
-        private Request(String email, Long shopId, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        private Request(String email, String shopCode, LocalDateTime startDateTime, LocalDateTime endDateTime) {
             this.email = email;
-            this.shopId = shopId;
+            this.shopCode = shopCode;
             this.startDateTime = startDateTime;
             this.endDateTime = endDateTime;
         }

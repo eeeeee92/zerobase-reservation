@@ -2,6 +2,7 @@ package com.zerobase.reservation.repository.reservation;
 
 import com.zerobase.reservation.domain.reservation.Reservation;
 import com.zerobase.reservation.domain.shop.Shop;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,12 +16,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     @Query("select r from Reservation r " +
             "where " +
-            "r.shop.id = :shopId " +
+            "r.shop = :shop " +
             "and r.startDateTime <= :endDateTime " +
             "and r.endDateTime >= :startDateTime")
     Optional<Reservation> confirmReservation(@Param("startDateTime") LocalDateTime startDateTime,
-                                             @Param("endDateTime")LocalDateTime endDateTime,
-                                             @Param("shopId")Long shopId);
+                                             @Param("endDateTime") LocalDateTime endDateTime,
+                                             @Param("shop") Shop shop);
 
 
+    @EntityGraph(attributePaths = {"member", "shop"})
+    Optional<Reservation> findByReservationCode(String reservationCode);
 }

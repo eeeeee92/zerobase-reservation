@@ -11,9 +11,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static com.zerobase.reservation.domain.member.QMember.member;
 import static com.zerobase.reservation.domain.reservation.QReservation.reservation;
-import static com.zerobase.reservation.domain.shop.QShop.shop;
 
 public class ReservationRepositoryQueryDslImpl extends QueryDsl4RepositorySupport implements ReservationRepositoryQueryDsl {
     public ReservationRepositoryQueryDslImpl() {
@@ -27,7 +25,7 @@ public class ReservationRepositoryQueryDslImpl extends QueryDsl4RepositorySuppor
                         .join(reservation.member).fetchJoin()
                         .join(reservation.shop).fetchJoin()
                         .where(
-                                shopIdEq(searchCondition.getShopId()),
+                                shopCodeEq(searchCondition.getShopCode()),
                                 emailEq(searchCondition.getEmail()),
                                 startDateBetween(searchCondition.getDate())
                         ),
@@ -35,7 +33,7 @@ public class ReservationRepositoryQueryDslImpl extends QueryDsl4RepositorySuppor
                         .select(reservation.count())
                         .from(reservation)
                         .where(
-                                shopIdEq(searchCondition.getShopId()),
+                                shopCodeEq(searchCondition.getShopCode()),
                                 emailEq(searchCondition.getEmail()),
                                 startDateBetween(searchCondition.getDate())
                         )
@@ -57,8 +55,8 @@ public class ReservationRepositoryQueryDslImpl extends QueryDsl4RepositorySuppor
     /**
      * 상점별 검색조건
      */
-    private BooleanExpression shopIdEq(Long shopId) {
-        return shopId == null ? null : reservation.shop.id.eq(shopId);
+    private BooleanExpression shopCodeEq(String shopCode) {
+        return !StringUtils.hasText(shopCode) ? null : reservation.shop.shopCode.eq(shopCode);
     }
 
     /**

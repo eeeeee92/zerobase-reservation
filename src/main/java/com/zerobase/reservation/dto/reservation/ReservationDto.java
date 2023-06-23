@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ReservationDto {
-    private Long id;
+    private String reservationCode;
     private Shop shop;
     private Member member;
     private LocalDateTime startDateTime;
@@ -23,8 +23,8 @@ public class ReservationDto {
 
 
     @Builder
-    private ReservationDto(Long id, Shop shop, Member member, LocalDateTime startDateTime, LocalDateTime endDateTime, ArrivalStatus arrivalStatus) {
-        this.id = id;
+    private ReservationDto(String reservationCode, Shop shop, Member member, LocalDateTime startDateTime, LocalDateTime endDateTime, ArrivalStatus arrivalStatus) {
+        this.reservationCode = reservationCode;
         this.shop = shop;
         this.member = member;
         this.startDateTime = startDateTime;
@@ -34,7 +34,7 @@ public class ReservationDto {
 
     public static final ReservationDto of(Reservation reservation) {
         return ReservationDto.builder()
-                .id(reservation.getId())
+                .reservationCode(reservation.getReservationCode())
                 .shop(reservation.getShop())
                 .member(reservation.getMember())
                 .startDateTime(reservation.getStartDateTime())

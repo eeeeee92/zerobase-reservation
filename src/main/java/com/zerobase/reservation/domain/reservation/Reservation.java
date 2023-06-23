@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -29,6 +30,9 @@ public class Reservation {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Column(unique = true)
+    private String reservationCode;
+
     private LocalDateTime startDateTime;
 
     private LocalDateTime endDateTime;
@@ -38,6 +42,7 @@ public class Reservation {
 
     @Builder
     private Reservation(Shop shop, Member member, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        this.reservationCode = UUID.randomUUID().toString();
         this.shop = shop;
         this.member = member;
         this.startDateTime = startDateTime;
