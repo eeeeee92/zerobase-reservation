@@ -1,8 +1,5 @@
 package com.zerobase.reservation.domain.member;
 
-import com.zerobase.reservation.domain.reservation.Reservation;
-import com.zerobase.reservation.domain.shop.MemberShop;
-import com.zerobase.reservation.domain.shop.StarRating;
 import com.zerobase.reservation.type.Role;
 import com.zerobase.reservation.type.SocialType;
 import lombok.AccessLevel;
@@ -11,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -36,14 +31,6 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MemberShop> memberShops = new ArrayList<>();
-
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StarRating> starRatings = new ArrayList<>();
-
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Reservation> reservations = new ArrayList<>();
 
     @Builder
     private Member(String email, String password, String nickname, String imageUrl, String phoneNumber, Role role, SocialType socialType, String socialId, String refreshToken) {
@@ -72,6 +59,7 @@ public class Member {
         this.imageUrl = imageUrl;
         this.phoneNumber = phoneNumber;
     }
+
 
     public void updateRefreshToken(String updateRefreshToken) {
         this.refreshToken = updateRefreshToken;

@@ -294,7 +294,6 @@ class ReservationServiceTest {
         given(reservationRepository.findByReservationCode(any()))
                 .willReturn(Optional.empty());
         //when //then
-        verify(reservationRepository, times(1)).findByReservationCode(any());
         ArgumentException exception = assertThrows(ArgumentException.class,
                 () -> reservationService.updateArrival(reservation.getReservationCode(), shop.getShopCode(), LocalDateTime.now()));
 

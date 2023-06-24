@@ -19,4 +19,5 @@ class ReservationTest {
         assertThat(reservation.getArrivalStatus()).isEqualTo(ArrivalStatus.N);
     }
 
+
 }

@@ -40,6 +40,7 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ArrivalStatus arrivalStatus;
 
+
     @Builder
     private Reservation(Shop shop, Member member, LocalDateTime startDateTime, LocalDateTime endDateTime) {
         this.reservationCode = UUID.randomUUID().toString();
@@ -50,7 +51,7 @@ public class Reservation {
         this.arrivalStatus = ArrivalStatus.N;
     }
 
-    public void updateArrivalStatus(){
+    public void updateArrivalStatus() {
         this.arrivalStatus = ArrivalStatus.Y;
     }
 }

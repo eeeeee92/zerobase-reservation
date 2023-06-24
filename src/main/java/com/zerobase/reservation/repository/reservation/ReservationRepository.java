@@ -4,6 +4,7 @@ import com.zerobase.reservation.domain.reservation.Reservation;
 import com.zerobase.reservation.domain.shop.Shop;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -26,4 +27,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     @EntityGraph(attributePaths = {"member", "shop"})
     Optional<Reservation> findByReservationCode(String reservationCode);
+
+    @Modifying(clearAutomatically = true)
+    @Query("delete from Reservation r where r.member.id = :memberId")
+    void deleteByMemberId(@Param("memberId") Long memberId);
 }

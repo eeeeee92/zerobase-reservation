@@ -5,6 +5,9 @@ import com.zerobase.reservation.dto.member.MemberDto;
 import com.zerobase.reservation.global.exception.ArgumentException;
 import com.zerobase.reservation.global.exception.ErrorCode;
 import com.zerobase.reservation.repository.member.MemberRepository;
+import com.zerobase.reservation.repository.reservation.ReservationRepository;
+import com.zerobase.reservation.repository.review.ReviewRepository;
+import com.zerobase.reservation.repository.shop.MemberShopRepository;
 import com.zerobase.reservation.type.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +24,9 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MemberShopRepository memberShopRepository;
+    private final ReviewRepository reviewRepository;
+    private final ReservationRepository reservationRepository;
 
     @Transactional
     public MemberDto signUp(String email, String nickname, String password, String phoneNumber, Role role) {
@@ -47,7 +53,7 @@ public class MemberService {
             throw new ArgumentException(ALREADY_EXIST_NICKNAME, nickname);
         }
 
-        if(member.getRole() == Role.GUEST){
+        if (member.getRole() == Role.GUEST) {
             member.authorizeUser();
         }
 
@@ -63,11 +69,14 @@ public class MemberService {
 
         passwordValid(password, member.getPassword());
 
+        memberShopRepository.deleteByMemberId(member.getId());
+        reviewRepository.deleteByMemberId(member.getId());
+        reservationRepository.deleteByMemberId(member.getId());
         memberRepository.delete(member);
     }
 
     private void passwordValid(String password, String encodedPassword) {
-        if(!passwordEncoder.matches(password, encodedPassword)){
+        if (!passwordEncoder.matches(password, encodedPassword)) {
             throw new ArgumentException(ErrorCode.UN_MATCH_PASSWORD);
         }
     }
