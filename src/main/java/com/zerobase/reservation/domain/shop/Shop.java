@@ -40,4 +40,8 @@ public class Shop {
 
     }
 
+    public void updateRating(Double rating) {
+        this.rating = rating;
+    }
+
 }
