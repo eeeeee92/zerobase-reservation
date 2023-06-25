@@ -4,7 +4,6 @@ import com.zerobase.reservation.domain.kiosk.Kiosk;
 import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.repository.shop.ShopRepository;
 import com.zerobase.reservation.type.InstallationStatus;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -23,7 +22,6 @@ class KioskRepositoryTest {
     private ShopRepository shopRepository;
 
     @Test
-    @DisplayName("")
     public void findByKioskCode() throws Exception {
         //given
 
