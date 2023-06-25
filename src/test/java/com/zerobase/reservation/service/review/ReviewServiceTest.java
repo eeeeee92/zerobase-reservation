@@ -190,4 +190,34 @@ class ReviewServiceTest {
                 .extracting("errorCode", "errorMessage")
                 .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
     }
+
+    @Test
+    @DisplayName("리뷰 상세조회")
+    public void read() throws Exception {
+        //given
+        Member member = Member.builder().build();
+        Member saveMember = memberRepository.save(member);
+        Shop shop = Shop.builder().build();
+        Shop saveShop = shopRepository.save(shop);
+        Reservation reservation = Reservation.builder().build();
+        Reservation saveReservation = reservationRepository.save(reservation);
+
+        Review review = Review.builder()
+                .member(saveMember)
+                .shop(saveShop)
+                .reservation(saveReservation)
+                .rating(1)
+                .content("content")
+                .imageUrl("imageUrl")
+                .build();
+
+        Review saveReview = reviewRepository.save(review);
+
+        //when
+        Review findReview = reviewRepository.findByReviewCode(saveReview.getReviewCode())
+                .orElse(null);
+
+        //then
+        Assertions.assertThat(findReview).isEqualTo(saveReview);
+    }
 }

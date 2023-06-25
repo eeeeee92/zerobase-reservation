@@ -20,7 +20,8 @@ public enum ErrorCode {
     INVALID_TIME("아직 방문 요청을 할 수 없거나 방문 예정 시간이 지났습니다."),
     UN_MATCH_SHOP_CODE("예약하신 상점과 방문하신 상점이 일치하지 않습니다."),
     SHOP_NOT_VISITED("방문하지 않은 상점의 리뷰는 작성할 수 없습니다."),
-    ALREADY_EXIST_REVIEW("이미 작성 된 리뷰가 존재합니다.");
+    ALREADY_EXIST_REVIEW("이미 작성 된 리뷰가 존재합니다."),
+    REVIEW_NOT_FOUND("리뷰가 존재하지 않습니다");
 
 
     private final String description;
