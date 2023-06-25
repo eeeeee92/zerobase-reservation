@@ -21,8 +21,10 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = ReviewController.class)
@@ -73,6 +75,63 @@ class ReviewControllerTest {
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                 ).andDo(print())
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("리뷰 상세조회")
+    @WithMockUser
+    public void read() throws Exception {
+        //given
+
+        String email = "zerobase@naver.com";
+        String nickname = "zerobase";
+        String memberImageUrl = "imageUrl";
+        Member member = Member.builder()
+                .email(email)
+                .nickname(nickname)
+                .imageUrl(memberImageUrl)
+                .build();
+
+        Shop shop = Shop.builder()
+                .name("shop")
+                .build();
+
+        String shopCode = shop.getShopCode();
+        String shopName = shop.getName();
+        String reviewCode = UUID.randomUUID().toString();
+
+
+        Integer rating = 1;
+        String content = "content";
+        String reviewImageUrl = "imageUrl";
+
+        ReviewDto reviewDto = ReviewDto.builder()
+                .member(member)
+                .shop(shop)
+                .reviewCode(reviewCode)
+                .rating(1)
+                .content(content)
+                .imageUrl(reviewImageUrl)
+                .build();
+
+        given(reviewService.read(any()))
+                .willReturn(reviewDto);
+
+
+        //when //then
+        mockMvc.perform(get("/reviews/{reviewCode}", reviewCode)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value(email))
+                .andExpect(jsonPath("$.nickname").value(nickname))
+                .andExpect(jsonPath("$.memberImageUrl").value(memberImageUrl))
+                .andExpect(jsonPath("$.shopCode").value(shopCode))
+                .andExpect(jsonPath("$.shopName").value(shopName))
+                .andExpect(jsonPath("$.reviewCode").value(reviewCode))
+                .andExpect(jsonPath("$.rating").value(rating))
+                .andExpect(jsonPath("$.content").value(content))
+                .andExpect(jsonPath("$.reviewImageUrl").value(reviewImageUrl));
     }
 
 }
