@@ -1,8 +1,10 @@
 package com.zerobase.reservation.controller.shop;
 
-import com.zerobase.reservation.dto.shop.CreateShopDto;
-import com.zerobase.reservation.dto.shop.ShopDto;
-import com.zerobase.reservation.dto.shop.ShopInfoDto;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.zerobase.reservation.dto.shop.*;
+import com.zerobase.reservation.global.resolver.shop.PageDefault;
+import com.zerobase.reservation.global.resolver.shop.PageRequest;
 import com.zerobase.reservation.service.shop.ShopService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +13,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+
+import static com.zerobase.reservation.global.common.ColumnNamesConstants.NAME;
 
 @Slf4j
 @RestController
@@ -28,11 +32,21 @@ public class ShopController {
     }
 
     @GetMapping("/{shopCode}")
-    public ResponseEntity<ShopInfoDto.Response> read(@PathVariable String shopCode) {
+    public ResponseEntity<ShopInfoDetailDto.Response> read(@PathVariable String shopCode) {
         ShopDto shopDto = shopService.getShop(shopCode);
         return ResponseEntity.ok(
-                ShopInfoDto.Response.of(shopDto)
+                ShopInfoDetailDto.Response.of(shopDto)
         );
     }
+
+    @GetMapping
+    public ResponseEntity<PageInfo<ShopInfoDto.Response>> readAll(@PageDefault(sort = NAME) PageRequest pageRequest,
+                                                                  SearchConditionShopDto searchConditionShopDto) {
+        PageHelper.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
+        return ResponseEntity.ok(
+                PageInfo.of(shopService.getShops(searchConditionShopDto, pageRequest))
+        );
+    }
+
 
 }

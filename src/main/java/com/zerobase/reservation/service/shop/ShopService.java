@@ -3,15 +3,21 @@ package com.zerobase.reservation.service.shop;
 import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.domain.shop.MemberShop;
 import com.zerobase.reservation.domain.shop.Shop;
+import com.zerobase.reservation.dto.shop.SearchConditionShopDto;
 import com.zerobase.reservation.dto.shop.ShopDto;
+import com.zerobase.reservation.dto.shop.ShopInfoDto;
 import com.zerobase.reservation.global.exception.ArgumentException;
+import com.zerobase.reservation.global.resolver.shop.PageRequest;
 import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.repository.shop.MemberShopRepository;
 import com.zerobase.reservation.repository.shop.ShopRepository;
+import com.zerobase.reservation.repository.shop.mybatis.ShopMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static com.zerobase.reservation.global.exception.ErrorCode.MEMBER_NOT_FOUND;
 import static com.zerobase.reservation.global.exception.ErrorCode.SHOP_NOT_FOUND;
@@ -21,6 +27,8 @@ import static com.zerobase.reservation.global.exception.ErrorCode.SHOP_NOT_FOUND
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ShopService {
+
+    private final ShopMapper shopMapper;
     private final ShopRepository shopRepository;
     private final MemberShopRepository memberShopRepository;
     private final MemberRepository memberRepository;
@@ -46,6 +54,14 @@ public class ShopService {
         Shop findShop = shopRepository.findByShopCode(shopCode)
                 .orElseThrow(() -> new ArgumentException(SHOP_NOT_FOUND, shopCode));
         return ShopDto.of(findShop);
+    }
+
+    /**
+     * 상점 전체조회 (검색조건 및 정렬)
+     */
+    public List<ShopInfoDto.Response> getShops(SearchConditionShopDto condition, PageRequest pageRequest) {
+        List<ShopInfoDto.Response> allBySearchConditions = shopMapper.findAllBySearchConditions(condition, pageRequest);
+        return allBySearchConditions;
     }
 
 

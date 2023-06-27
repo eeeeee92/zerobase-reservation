@@ -57,6 +57,7 @@ public class SecurityConfig {
                 .antMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/members/sign-up").permitAll()
                 .antMatchers(HttpMethod.GET, "/shops/{shopCode}").permitAll()
+                .antMatchers(HttpMethod.GET, "/shops").permitAll()
                 .antMatchers(HttpMethod.GET, "/reviews/{reviewCode}").permitAll()
                 .anyRequest().authenticated()
                 .and()

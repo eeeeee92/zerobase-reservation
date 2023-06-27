@@ -62,7 +62,9 @@ public class ReviewService {
     }
 
 
-    /** 리뷰 상세조회 */
+    /**
+     * 리뷰 상세조회
+     */
     public ReviewDto read(String reviewCode) {
         return ReviewDto.of(reviewRepository.findByReviewCode(reviewCode)
                 .orElseThrow(() -> new ArgumentException(ErrorCode.REVIEW_NOT_FOUND, reviewCode)));

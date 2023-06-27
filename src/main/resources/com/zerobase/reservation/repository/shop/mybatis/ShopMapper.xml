@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/schema/mybatis-3-mapper.dtd">
+<mapper namespace="com.zerobase.reservation.repository.shop.mybatis.ShopMapper">
+
+    <select id="findAllBySearchConditions" resultType="com.zerobase.reservation.dto.shop.ShopInfoDto$Response">
+        select
+        <choose>
+            <when test='condition.latitude != null and condition.longitude != null'>
+                shop_code, rating, name, latitude, longitude, (6371 * acos(cos(radians(#{condition.latitude})) *
+                cos(radians(latitude)) *
+                cos(radians(longitude) - radians(#{condition.longitude})) + sin(radians(#{condition.latitude})) *
+                sin(radians(latitude))))
+                AS distance
+            </when>
+            <otherwise>
+                shop_code, rating, name, latitude, longitude
+            </otherwise>
+        </choose>
+        from shop
+        <trim prefix="order by" prefixOverrides=",">
+            <if test="condition.latitude != null and condition.longitude != null">
+                distance asc
+            </if>
+            <foreach item="item" collection="pageRequest.sort">
+                <if test="item.property == 'RATING'">
+                    , rating ${item.direction.name()}
+                </if>
+                <if test="item.property == 'NAME'">
+                    , name ${item.direction.name()}
+                </if>
+            </foreach>
+        </trim>
+    </select>
+</mapper>

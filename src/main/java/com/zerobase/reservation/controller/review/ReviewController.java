@@ -1,7 +1,6 @@
 package com.zerobase.reservation.controller.review;
 
 import com.zerobase.reservation.dto.review.CreateReviewDto;
-import com.zerobase.reservation.dto.review.ReviewDto;
 import com.zerobase.reservation.dto.review.ReviewInfoDetailDto;
 import com.zerobase.reservation.service.review.ReviewService;
 import lombok.RequiredArgsConstructor;
