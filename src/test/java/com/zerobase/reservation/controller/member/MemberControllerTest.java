@@ -84,7 +84,7 @@ class MemberControllerTest {
         //given
         String email = "zerobase@naver.com";
         DeleteMemberDto.Request request = DeleteMemberDto.Request.builder()
-                .password("1234")
+                .password("1234435431")
                 .build();
         String json = objectMapper.writeValueAsString(request);
 
@@ -100,7 +100,7 @@ class MemberControllerTest {
     private static SignupDto getDto() {
         return SignupDto.builder()
                 .email("zerobase@naver.com")
-                .password("123123")
+                .password("123123123412")
                 .nickname("제로베이스")
                 .phoneNumber("01000000000")
                 .role(USER)

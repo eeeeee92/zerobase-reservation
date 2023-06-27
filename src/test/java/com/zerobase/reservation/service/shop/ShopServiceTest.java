@@ -40,8 +40,6 @@ class ShopServiceTest {
     @MockBean
     MemberRepository memberRepository;
 
-    Moc
-
     @Test
     @DisplayName("상점을 등록한다")
     public void createShop() throws Exception {

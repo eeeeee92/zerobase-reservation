@@ -5,21 +5,33 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SignupDto {
     @Email
+    @NotNull
     private String email;
-    @NotNull
+
+    @Pattern(regexp = "^(?=.*[A-Za-z0-9])(?=.*[!@#$%^&*()-_=+\\|[{]};:'\",<.>/?]).*$")
+    @NotEmpty
+    @Length(max = 16, min = 8)
     private String password;
-    @NotNull
+
+    @NotEmpty
+    @Length(min = 2, max = 15)
     private String nickname;
-    @NotNull
+
+    @NotEmpty
+    @Pattern(regexp = "^010\\d{8}$")
     private String phoneNumber;
+
     @NotNull
     private Role role;
 
