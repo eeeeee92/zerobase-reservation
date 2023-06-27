@@ -31,6 +31,47 @@ public class MemberService {
     @Transactional
     public MemberDto signUp(String email, String nickname, String password, String phoneNumber, Role role) {
 
+        duplicateCheckBy(email, nickname);
+
+        Member saveMember = memberRepository.save(build(email, nickname, password, phoneNumber, role));
+        return MemberDto.of(saveMember);
+    }
+
+
+    @Transactional
+    public MemberDto update(String email, String password, String nickname, String imageUrl, String phoneNumber) {
+
+        Member member = getMemberBy(email);
+
+        duplicateCheck(nickname, member.getNickname());
+
+        RoleGuestUpdateRoleUser(member);
+
+        member.updateMember((passwordEncoder.encode(password)), nickname, imageUrl, phoneNumber);
+
+        return MemberDto.of(member);
+    }
+
+
+    @Transactional
+    public void delete(String email, String password) {
+        Member member = getMemberBy(email);
+
+        validatePassword(password, member.getPassword());
+
+        deleteChildTables(member);
+
+        memberRepository.delete(member);
+    }
+
+    private void deleteChildTables(Member member) {
+        memberShopRepository.deleteByMemberId(member.getId());
+        reviewRepository.deleteByMemberId(member.getId());
+        reservationRepository.deleteByMemberId(member.getId());
+    }
+
+
+    private void duplicateCheckBy(String email, String nickname) {
         if (memberRepository.findByEmail(email).isPresent()) {
             throw new ArgumentException(ALREADY_EXIST_EMAIL, email);
         }
@@ -38,48 +79,33 @@ public class MemberService {
         if (memberRepository.findByNickname(nickname).isPresent()) {
             throw new ArgumentException(ALREADY_EXIST_NICKNAME, nickname);
         }
-
-        Member saveMember = memberRepository.save(build(email, nickname, password, phoneNumber, role));
-        return MemberDto.of(saveMember);
     }
 
-    @Transactional
-    public MemberDto update(String email, String password, String nickname, String imageUrl, String phoneNumber) {
-
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new ArgumentException(ErrorCode.MEMBER_NOT_FOUND, email));
-
-        if (memberRepository.findByNickname(nickname).isPresent() && !member.getNickname().equals(nickname)) {
+    private void duplicateCheck(String nickname, String memberNickname) {
+        if (memberRepository.findByNickname(nickname).isPresent() && !memberNickname.equals(nickname)) {
             throw new ArgumentException(ALREADY_EXIST_NICKNAME, nickname);
         }
-
-        if (member.getRole() == Role.GUEST) {
-            member.authorizeUser();
-        }
-
-        member.updateMember(passwordEncoder.encode(password), nickname, imageUrl, phoneNumber);
-
-        return MemberDto.of(member);
     }
 
-    @Transactional
-    public void delete(String email, String password) {
-        Member member = memberRepository.findByEmail(email)
+    private Member getMemberBy(String email) {
+        return memberRepository.findByEmail(email)
                 .orElseThrow(() -> new ArgumentException(ErrorCode.MEMBER_NOT_FOUND, email));
-
-        passwordValid(password, member.getPassword());
-
-        memberShopRepository.deleteByMemberId(member.getId());
-        reviewRepository.deleteByMemberId(member.getId());
-        reservationRepository.deleteByMemberId(member.getId());
-        memberRepository.delete(member);
     }
 
-    private void passwordValid(String password, String encodedPassword) {
+
+    private void validatePassword(String password, String encodedPassword) {
         if (!passwordEncoder.matches(password, encodedPassword)) {
             throw new ArgumentException(ErrorCode.UN_MATCH_PASSWORD);
         }
     }
+
+    private static void RoleGuestUpdateRoleUser(Member member) {
+        if (member.getRole() == Role.GUEST) {
+            member.authorizeUser();
+        }
+    }
+
+
 
     private Member build(String email, String nickname, String password, String phoneNumber, Role role) {
         return Member.builder()
