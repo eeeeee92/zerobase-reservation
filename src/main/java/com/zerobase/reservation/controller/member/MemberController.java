@@ -49,7 +49,7 @@ public class MemberController {
     @DeleteMapping("/{email}")
     @PreAuthorize("isAuthenticated() and ((#email == principal.username))")
     public ResponseEntity<?> delete(@PathVariable String email,
-                                    @RequestBody DeleteMemberDto.Request deleteMemberDto) {
+                                    @Valid @RequestBody DeleteMemberDto.Request deleteMemberDto) {
 
         memberService.delete(email, deleteMemberDto.getPassword());
         return ResponseEntity.ok().build();

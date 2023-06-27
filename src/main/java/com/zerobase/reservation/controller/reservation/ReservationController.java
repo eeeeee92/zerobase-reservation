@@ -12,7 +12,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -44,7 +43,7 @@ public class ReservationController {
     @GetMapping
     @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) or (hasRole('SELLER')))")
     public ResponseEntity<Page<ReservationInfoDto.Response>> readAllByCondition(
-            SearchConditionReservationDto request,
+            @Valid SearchConditionReservationDto request,
             @PageableDefault(sort = "startDateTime") Pageable pageable) {
         return ResponseEntity.ok(
                 reservationService.getReservationsByCondition(request, pageable)

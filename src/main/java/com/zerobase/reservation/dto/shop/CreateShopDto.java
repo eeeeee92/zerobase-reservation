@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 
@@ -15,15 +16,18 @@ public class CreateShopDto {
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class Request {
+
         @Email
         @NotNull
         private String email;
 
-        @NotNull
+        @NotEmpty
         private String name;
 
+        @NotNull
         private Double latitude;
 
+        @NotNull
         private Double longitude;
 
         @Builder

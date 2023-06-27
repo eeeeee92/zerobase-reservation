@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -19,7 +21,7 @@ public class ReviewController {
 
     @PostMapping
     @PreAuthorize("isAuthenticated() and ((request.email == principal.username) and (hasRole('USER')))")
-    public ResponseEntity<?> create(@RequestBody CreateReviewDto.Request request) {
+    public ResponseEntity<?> create(@Valid @RequestBody CreateReviewDto.Request request) {
 
         reviewService.create(request.getEmail(), request.getShopCode(),
                 request.getReservationCode(), request.getRating(),

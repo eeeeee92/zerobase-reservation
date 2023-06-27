@@ -8,6 +8,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Future;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public class CreateReservationDto {
@@ -16,7 +18,9 @@ public class CreateReservationDto {
     @Getter
     public static class Request {
         @Email
+        @NotNull
         private String email;
+        @NotEmpty
         private String shopCode;
 
         @Future
