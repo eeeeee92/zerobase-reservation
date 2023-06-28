@@ -39,31 +39,39 @@ public class ShopService {
     @Transactional
     public ShopDto createShop(String email, String name, Double latitude, Double longitude) {
 
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new ArgumentException(MEMBER_NOT_FOUND, email));
+        Member member = getMemberBy(email);
         Shop saveShop = shopRepository.save(getShopBy(name, latitude, longitude));
         memberShopRepository.save(getMemberShopBy(member, saveShop));
 
         return ShopDto.of(saveShop);
     }
 
+
     /**
      * 상점 상세 조회
      */
     public ShopDto getShop(String shopCode) {
-        Shop findShop = shopRepository.findByShopCode(shopCode)
-                .orElseThrow(() -> new ArgumentException(SHOP_NOT_FOUND, shopCode));
-        return ShopDto.of(findShop);
+        return ShopDto.of(getShopBy(shopCode));
     }
+
 
     /**
      * 상점 전체조회 (검색조건 및 정렬)
      */
     public List<ShopInfoDto.Response> getShops(SearchConditionShopDto condition, PageRequest pageRequest) {
-        List<ShopInfoDto.Response> allBySearchConditions = shopMapper.findAllBySearchConditions(condition, pageRequest);
-        return allBySearchConditions;
+        return shopMapper.findAllBySearchConditions(condition, pageRequest);
     }
 
+    private Member getMemberBy(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new ArgumentException(MEMBER_NOT_FOUND, email));
+    }
+
+
+    private Shop getShopBy(String shopCode) {
+        return shopRepository.findByShopCode(shopCode)
+                .orElseThrow(() -> new ArgumentException(SHOP_NOT_FOUND, shopCode));
+    }
 
     private MemberShop getMemberShopBy(Member member, Shop saveShop) {
         return MemberShop.builder()

@@ -20,7 +20,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
             "r.shop = :shop " +
             "and r.startDateTime <= :endDateTime " +
             "and r.endDateTime >= :startDateTime")
-    Optional<Reservation> confirmReservation(@Param("startDateTime") LocalDateTime startDateTime,
+    Optional<Reservation> existReservationBy(@Param("startDateTime") LocalDateTime startDateTime,
                                              @Param("endDateTime") LocalDateTime endDateTime,
                                              @Param("shop") Shop shop);
 

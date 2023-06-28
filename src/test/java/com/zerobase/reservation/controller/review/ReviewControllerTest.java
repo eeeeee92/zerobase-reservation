@@ -114,7 +114,7 @@ class ReviewControllerTest {
                 .imageUrl(reviewImageUrl)
                 .build();
 
-        given(reviewService.read(any()))
+        given(reviewService.getReview(any()))
                 .willReturn(reviewDto);
 
 

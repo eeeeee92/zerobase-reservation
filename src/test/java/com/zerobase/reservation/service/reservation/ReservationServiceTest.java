@@ -81,7 +81,7 @@ class ReservationServiceTest {
         //then
         verify(memberRepository, times(1)).findByEmail(any());
         verify(shopRepository, times(1)).findByShopCode(any());
-        verify(reservationRepository, times(1)).confirmReservation(any(), any(), any());
+        verify(reservationRepository, times(1)).existReservationBy(any(), any(), any());
         verify(reservationRepository, times(1)).save(any());
 
 
@@ -145,7 +145,7 @@ class ReservationServiceTest {
                 .build();
         given(memberRepository.findByEmail(email)).willReturn(Optional.of(member));
         given(shopRepository.findByShopCode(any())).willReturn(Optional.of(shop));
-        given(reservationRepository.confirmReservation(any(), any(), any())).willReturn(Optional.of(reservation));
+        given(reservationRepository.existReservationBy(any(), any(), any())).willReturn(Optional.of(reservation));
         ArgumentException argumentException = new ArgumentException(ErrorCode.ALREADY_EXIST_RESERVATION, String.format("%s or %s", startDateTime, endDateTime));
 
         //when //then

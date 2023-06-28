@@ -33,7 +33,7 @@ public class ReviewController {
     @GetMapping("/{reviewCode}")
     public ResponseEntity<ReviewInfoDetailDto.Response> read(@PathVariable String reviewCode) {
         return ResponseEntity.ok(
-                ReviewInfoDetailDto.Response.of(reviewService.read(reviewCode))
+                ReviewInfoDetailDto.Response.of(reviewService.getReview(reviewCode))
         );
     }
 

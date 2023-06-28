@@ -7,7 +7,6 @@ import com.zerobase.reservation.dto.reservation.ReservationDto;
 import com.zerobase.reservation.dto.reservation.SearchConditionReservationDto;
 import com.zerobase.reservation.global.exception.ArgumentException;
 import com.zerobase.reservation.global.exception.ConflictException;
-import com.zerobase.reservation.global.exception.ErrorCode;
 import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.repository.reservation.ReservationRepository;
 import com.zerobase.reservation.repository.shop.ShopRepository;
@@ -38,23 +37,19 @@ public class ReservationService {
     @Transactional
     public ReservationDto create(String email, String shopCode, LocalDateTime startDateTime, LocalDateTime endDateTime) {
 
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new ArgumentException(MEMBER_NOT_FOUND, email));
-        Shop shop = shopRepository.findByShopCode(shopCode)
-                .orElseThrow(() -> new ArgumentException(SHOP_NOT_FOUND, shopCode));
+        Member member = getMemberBy(email);
 
-        if (endDateTime.isBefore(startDateTime)) {
-            throw new ArgumentException(END_TIME_MUST_BE_AFTER_START_TIME, String.format("start[%s], end[%s]", startDateTime, endDateTime));
-        }
+        Shop shop = getShopBy(shopCode);
 
+        //예약 종료시간이 예약 시작시간 보다 이전인지 확인
+        validateEndTimeIsBefore(startDateTime, endDateTime);
 
-        if (reservationRepository.confirmReservation((startDateTime.plusSeconds(1)), endDateTime, shop).isPresent()) {
-            throw new ArgumentException(ALREADY_EXIST_RESERVATION,
-                    String.format("%s or %s", startDateTime, endDateTime));
-        }
+        //해당시간에 예약이 존재하는지 확인
+        isReservationExist(startDateTime, endDateTime, shop);
 
-        Reservation reservation = reservationRepository.save(getReservation(startDateTime, endDateTime, member, shop));
-        return ReservationDto.of(reservation);
+        return ReservationDto.of(
+                reservationRepository.save(getReservation(startDateTime, endDateTime, member, shop))
+        );
     }
 
     /**
@@ -69,33 +64,72 @@ public class ReservationService {
      * 예약 상세조회
      */
     public ReservationDto getReservation(String reservationCode) {
-        Reservation reservation = reservationRepository.findByReservationCode(reservationCode).
-                orElseThrow(() -> new ArgumentException(RESERVATION_NOT_FOUND, reservationCode));
-        return ReservationDto.of(reservation);
+        return ReservationDto.of(getReservationBy(reservationCode));
     }
+
 
     @Transactional
     public ReservationDto updateArrival(String reservationCode, String shopCode, LocalDateTime now) {
-        Reservation reservation = reservationRepository.findByReservationCode(reservationCode)
-                .orElseThrow(() -> new ArgumentException(RESERVATION_NOT_FOUND, reservationCode));
+        Reservation reservation = getReservationBy(reservationCode);
 
+        //도착요청 가능한 시간
         LocalDateTime arrivalTimeRange = getArrivalTimeRange(reservation.getStartDateTime());
 
-        if(arrivalTimeRange.isAfter(now) || now.isAfter(reservation.getEndDateTime())){
-            throw new ConflictException(INVALID_TIME, now.toString());
-        }
+        //현재 방문시간이 도착요청이 가능한 시간인지 확인
+        validateVisitationTime(now, reservation.getEndDateTime(), arrivalTimeRange);
 
-        Shop shop = shopRepository.findByShopCode(shopCode)
-                .orElseThrow(() -> new ArgumentException(SHOP_NOT_FOUND, shopCode));
+        Shop shop = getShopBy(shopCode);
 
-        if(!reservation.getShop().getShopCode().equals(shop.getShopCode())){
-            throw new ArgumentException(UN_MATCH_SHOP_CODE, shopCode);
-        }
+        //예약된 샵과 방문한 샵이 일치하는지 확인
+        isShopMatchingReservation(reservation.getShop(), shop);
 
+        //방문 완료로 변경
         reservation.updateArrivalStatus();
 
         return ReservationDto.of(reservation);
     }
+
+    private static void isShopMatchingReservation(Shop reservationShop, Shop shop) {
+        if(!reservationShop.getShopCode().equals(shop.getShopCode())){
+            throw new ArgumentException(UN_MATCH_SHOP_CODE, shop.getShopCode());
+        }
+    }
+
+    private static void validateVisitationTime(LocalDateTime now, LocalDateTime endTime, LocalDateTime arrivalTimeRange) {
+        if(arrivalTimeRange.isAfter(now) || now.isAfter(endTime)){
+            throw new ConflictException(INVALID_TIME, now.toString());
+        }
+    }
+
+
+    private static void validateEndTimeIsBefore(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        if (endDateTime.isBefore(startDateTime)) {
+            throw new ArgumentException(END_TIME_MUST_BE_AFTER_START_TIME, String.format("start[%s], end[%s]", startDateTime, endDateTime));
+        }
+    }
+
+    private Reservation getReservationBy(String reservationCode) {
+        return reservationRepository.findByReservationCode(reservationCode).
+                orElseThrow(() -> new ArgumentException(RESERVATION_NOT_FOUND, reservationCode));
+    }
+
+    private Shop getShopBy(String shopCode) {
+        return shopRepository.findByShopCode(shopCode)
+                .orElseThrow(() -> new ArgumentException(SHOP_NOT_FOUND, shopCode));
+    }
+
+    private Member getMemberBy(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new ArgumentException(MEMBER_NOT_FOUND, email));
+    }
+
+    private void isReservationExist(LocalDateTime startDateTime, LocalDateTime endDateTime, Shop shop) {
+        if (reservationRepository.existReservationBy((startDateTime.plusSeconds(1)), endDateTime, shop).isPresent()) {
+            throw new ArgumentException(ALREADY_EXIST_RESERVATION,
+                    String.format("%s or %s", startDateTime, endDateTime));
+        }
+    }
+
 
     private LocalDateTime getArrivalTimeRange(LocalDateTime startTime) {
         return startTime.minusMinutes(10);

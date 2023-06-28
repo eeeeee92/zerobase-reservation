@@ -52,7 +52,7 @@ class ReservationRepositoryTest {
         reservationRepository.save(reservation);
 
         //when
-        Optional<Reservation> reservation1 = reservationRepository.confirmReservation(wantStartDate, wantEndDate, shop);
+        Optional<Reservation> reservation1 = reservationRepository.existReservationBy(wantStartDate, wantEndDate, shop);
 
         //then
         Assertions.assertTrue(reservation1.isEmpty());

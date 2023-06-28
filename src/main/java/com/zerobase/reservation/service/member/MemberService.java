@@ -31,10 +31,10 @@ public class MemberService {
     @Transactional
     public MemberDto signUp(String email, String nickname, String password, String phoneNumber, Role role) {
 
+        //이메일과 닉네임이 중복되는지 확인
         duplicateCheckBy(email, nickname);
 
-        Member saveMember = memberRepository.save(build(email, nickname, password, phoneNumber, role));
-        return MemberDto.of(saveMember);
+        return MemberDto.of(memberRepository.save(build(email, nickname, password, phoneNumber, role)));
     }
 
 
@@ -43,8 +43,10 @@ public class MemberService {
 
         Member member = getMemberBy(email);
 
+        //변경하려는 닉네임이 기존 닉네임과 다를 때 닉네임이 이미 존재하는지 확인
         duplicateCheck(nickname, member.getNickname());
 
+        //oauth2 회원가입 한 회원이 추가정보를 입력한 경우에 권한을 guest -> user 로 변경
         RoleGuestUpdateRoleUser(member);
 
         member.updateMember((passwordEncoder.encode(password)), nickname, imageUrl, phoneNumber);
@@ -57,8 +59,10 @@ public class MemberService {
     public void delete(String email, String password) {
         Member member = getMemberBy(email);
 
+        //비밀번호가 일치하는지 확인
         validatePassword(password, member.getPassword());
 
+        //회원을 삭제하기 전 자식테이블에 있는 회원기록들을 먼저 삭제
         deleteChildTables(member);
 
         memberRepository.delete(member);

@@ -30,28 +30,20 @@ public class ReviewService {
     private final ShopRepository shopRepository;
 
 
-    /**
-     * 리뷰 등록
-     */
+    /** 리뷰 등록 */
     @Transactional
     public ReviewDto create(String email, String shopCode, String reservationCode, Integer rating, String content, String imageUrl) {
-        Reservation reservation = reservationRepository.findByReservationCode(reservationCode)
-                .orElseThrow(() -> new ArgumentException(ErrorCode.RESERVATION_NOT_FOUND, reservationCode));
+        Reservation reservation = getReservationBy(reservationCode);
 
         //방문 이후 리뷰를 작성할 수 있다
-        if (reservation.getArrivalStatus() == ArrivalStatus.N) {
-            throw new ConflictException(ErrorCode.SHOP_NOT_VISITED);
-        }
+        isVisited(reservation.getArrivalStatus());
 
         //리뷰는 예약당 한번만 작성할 수 있다
-        if (reviewRepository.existsByReservation(reservation)) {
-            throw new ConflictException(ErrorCode.ALREADY_EXIST_REVIEW);
-        }
-        Member member = memberRepository.findByEmail(email).orElseThrow(() ->
-                new ArgumentException(ErrorCode.MEMBER_NOT_FOUND, email));
+        isReviewExist(reservation);
 
-        Shop shop = shopRepository.findByShopCode(shopCode).orElseThrow(() ->
-                new ArgumentException(ErrorCode.SHOP_NOT_FOUND, shopCode));
+        Member member = getMemberBy(email);
+
+        Shop shop = getShopBy(shopCode);
 
         Review saveReview = reviewRepository.save(getReview(rating, content, imageUrl, reservation, member, shop));
 
@@ -62,18 +54,44 @@ public class ReviewService {
     }
 
 
-    /**
-     * 리뷰 상세조회
-     */
-    public ReviewDto read(String reviewCode) {
+    /** 리뷰 상세조회 */
+    public ReviewDto getReview(String reviewCode) {
         return ReviewDto.of(reviewRepository.findByReviewCode(reviewCode)
                 .orElseThrow(() -> new ArgumentException(ErrorCode.REVIEW_NOT_FOUND, reviewCode)));
+    }
+
+
+    private Reservation getReservationBy(String reservationCode) {
+        return reservationRepository.findByReservationCode(reservationCode)
+                .orElseThrow(() -> new ArgumentException(ErrorCode.RESERVATION_NOT_FOUND, reservationCode));
     }
 
     private double getRatingAverage(Shop shop) {
         return reviewRepository.findAllByShop(shop)
                 .stream().mapToInt(Review::getRating)
                 .average().orElse(0);
+    }
+
+    private Shop getShopBy(String shopCode) {
+        return shopRepository.findByShopCode(shopCode).orElseThrow(() ->
+                new ArgumentException(ErrorCode.SHOP_NOT_FOUND, shopCode));
+    }
+
+    private Member getMemberBy(String email) {
+        return memberRepository.findByEmail(email).orElseThrow(() ->
+                new ArgumentException(ErrorCode.MEMBER_NOT_FOUND, email));
+    }
+
+    private void isReviewExist(Reservation reservation) {
+        if (reviewRepository.existsByReservation(reservation)) {
+            throw new ConflictException(ErrorCode.ALREADY_EXIST_REVIEW);
+        }
+    }
+
+    private static void isVisited(ArrivalStatus arrivalStatus) {
+        if (arrivalStatus == ArrivalStatus.N) {
+            throw new ConflictException(ErrorCode.SHOP_NOT_VISITED);
+        }
     }
 
     private static Review getReview(Integer rating, String content, String imageUrl, Reservation reservation, Member member, Shop shop) {
