@@ -68,23 +68,17 @@ class ReviewServiceTest {
         reservation1.updateArrivalStatus();
 
         reservationRepository.save(reservation);
-        reservationRepository.save(reservation1);
         int rating = 5;
-        int rating1 = 0;
         String content = "zerobase";
         String imageUrl = "imageUrl";
         //when
-        reviewService.create(email, shop.getShopCode(), reservation.getReservationCode(),
+        ReviewDto reviewDto = reviewService.create(email, shop.getShopCode(), reservation.getReservationCode(),
                 rating, content, imageUrl);
-        ReviewDto reviewDto1 = reviewService.create(email, shop.getShopCode(), reservation1.getReservationCode(),
-                rating1, content, imageUrl);
 
 
         //then
-        Assertions.assertThat(reviewDto1).extracting("rating", "rating", "content", "imageUrl")
-                .contains(rating1, content, imageUrl);
-        Assertions.assertThat(reviewDto1.getShop().getRating())
-                .isEqualTo(2.5);
+        Assertions.assertThat(reviewDto).extracting("rating", "rating", "content", "imageUrl")
+                .contains(rating, content, imageUrl);
     }
 
     @Test

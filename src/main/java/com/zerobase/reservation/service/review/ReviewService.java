@@ -45,11 +45,7 @@ public class ReviewService {
 
         Shop shop = getShopBy(shopCode);
 
-        Review saveReview = reviewRepository.save(getReview(rating, content, imageUrl, reservation, member, shop));
-
-        shop.updateRating(getRatingAverage(shop));
-
-        return ReviewDto.of(saveReview);
+        return ReviewDto.of(reviewRepository.save(getReview(rating, content, imageUrl, reservation, member, shop)));
 
     }
 
@@ -64,12 +60,6 @@ public class ReviewService {
     private Reservation getReservationBy(String reservationCode) {
         return reservationRepository.findByReservationCode(reservationCode)
                 .orElseThrow(() -> new ArgumentException(ErrorCode.RESERVATION_NOT_FOUND, reservationCode));
-    }
-
-    private double getRatingAverage(Shop shop) {
-        return reviewRepository.findAllByShop(shop)
-                .stream().mapToInt(Review::getRating)
-                .average().orElse(0);
     }
 
     private Shop getShopBy(String shopCode) {
