@@ -25,6 +25,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     List<Review> findAllByShop(Shop shop);
 
+    @Query("select r.rating from Review r where r.shop.id = :shopId")
+    List<Integer> findAllRatingByShopId(@Param("shopId") Long shopId);
+
+
     @EntityGraph(attributePaths = {"member","shop","reservation"})
     Optional<Review> findByReviewCode(String reviewCode);
 }
