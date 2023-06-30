@@ -11,21 +11,18 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@IdClass(MemberShopId.class)
 public class MemberShop {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_shop_id")
-    private Long id;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id")
     private Shop shop;
-
 
     @Builder
     private MemberShop(Member member, Shop shop) {

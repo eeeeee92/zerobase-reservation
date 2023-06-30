@@ -1,6 +1,5 @@
 package com.zerobase.reservation.domain.kiosk;
 
-import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.type.InstallationStatus;
 import lombok.AccessLevel;
@@ -19,15 +18,21 @@ public class Kiosk {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "kiosk_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id")
     private Shop shop;
-    @Column(unique = true)
+
+    @Column(unique = true, nullable = false)
     private String kioskCode;
+
     private String installationLocation;
+
     private LocalDate installationYear;
+
+    @Column(nullable = false)
     private InstallationStatus installationStatus;
 
 

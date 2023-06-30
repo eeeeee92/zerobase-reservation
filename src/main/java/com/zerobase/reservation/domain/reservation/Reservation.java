@@ -30,13 +30,16 @@ public class Reservation {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String reservationCode;
 
+    @Column(nullable = false)
     private LocalDateTime startDateTime;
 
+    @Column(nullable = false)
     private LocalDateTime endDateTime;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ArrivalStatus arrivalStatus;
 

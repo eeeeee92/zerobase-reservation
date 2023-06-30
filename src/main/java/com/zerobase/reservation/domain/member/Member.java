@@ -19,18 +19,28 @@ public class Member {
     @Column(name = "member_id")
     private Long id;
 
+    @Column(unique = true, nullable = false)
     private String email;
+
     private String password;
+
+    @Column(unique = true, nullable = false)
     private String nickname;
+
     private String imageUrl;
+
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
+    private String socialId;
+
+    private String refreshToken;
 
     @Builder
     private Member(String email, String password, String nickname, String imageUrl, String phoneNumber, Role role, SocialType socialType, String socialId, String refreshToken) {
@@ -45,9 +55,6 @@ public class Member {
         this.refreshToken = refreshToken;
     }
 
-    private String socialId;
-
-    private String refreshToken;
 
     public void authorizeUser() {
         this.role = Role.USER;

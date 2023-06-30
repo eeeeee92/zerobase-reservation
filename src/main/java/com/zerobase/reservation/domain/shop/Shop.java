@@ -18,15 +18,19 @@ public class Shop {
     @Column(name = "shop_id")
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String shopCode;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private Double latitude;
 
+    @Column(nullable = false)
     private Double longitude;
 
+    @Column(nullable = false)
     private Double rating;
 
 

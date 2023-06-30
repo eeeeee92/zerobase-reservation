@@ -18,10 +18,11 @@ public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "review_id")
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reservation_id", unique = true)
+    @JoinColumn(name = "reservation_id")
     private Reservation reservation;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -32,11 +33,13 @@ public class Review {
     @JoinColumn(name = "shop_id")
     private Shop shop;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String reviewCode;
 
+    @Column(nullable = false)
     private Integer rating;
 
+    @Column(nullable = false)
     private String content;
 
     private String imageUrl;
