@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.validation.ConstraintViolationException;
+
 import static com.zerobase.reservation.global.exception.ErrorCode.INVALID_REQUEST;
 import static org.springframework.http.HttpStatus.*;
 
@@ -33,6 +35,17 @@ public class GlobalExceptionHandler {
                 .status(BAD_REQUEST)
                 .errorCode(INVALID_REQUEST)
                 .errorMessage(e.getBindingResult().getAllErrors().get(0).getDefaultMessage())
+                .build();
+    }
+
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ErrorResponse bindException(ConstraintViolationException e) {
+        return ErrorResponse.builder()
+                .code(INTERNAL_SERVER_ERROR.value())
+                .status(INTERNAL_SERVER_ERROR)
+                .errorCode(ErrorCode.INTERNAL_SERVER_ERROR)
+                .errorMessage(ErrorCode.INTERNAL_SERVER_ERROR.getDescription())
                 .build();
     }
 
