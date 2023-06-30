@@ -6,6 +6,7 @@ import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.reservation.SearchConditionReservationDto;
 import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.repository.shop.ShopRepository;
+import com.zerobase.reservation.type.Role;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -35,11 +36,24 @@ class ReservationRepositoryQueryDslImplTest {
     @Test
     public void findAllBySearchConditions_memberIdEq() throws Exception {
         //given
-        Member member1 = Member.builder().email("zerobase1@naver.com").build();
-        Member member2 = Member.builder().email("zerobase2@naver.com").build();
-        Member member3 = Member.builder().email("zerobase3@naver.com").build();
+        Member member1 = Member.builder().email("zerobase1@naver.com")
+                .nickname("닉네임")
+                .role(Role.USER)
+                .build();
+        Member member2 = Member.builder().email("zerobase2@naver.com")
+                .nickname("닉네임1")
+                .role(Role.USER)
+                .build();
+        Member member3 = Member.builder().email("zerobase3@naver.com")
+                .nickname("닉네임2")
+                .role(Role.USER)
+                .build();
         List<Member> members = Arrays.asList(member1, member2, member3);
-        Shop shop = Shop.builder().name("shop1").build();
+        Shop shop = Shop.builder().name("shop1")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
+                .build();
 
         LocalDateTime of1 = LocalDateTime.of(2023, 5, 23, 0, 1);
         LocalDateTime of2 = LocalDateTime.of(2023, 5, 24, 0, 1);
@@ -75,11 +89,26 @@ class ReservationRepositoryQueryDslImplTest {
     @Test
     public void findAllBySearchConditions_shopIdEq() throws Exception {
         //given
-        Member member = Member.builder().email("zerobase1@naver.com").build();
+        Member member = Member.builder().email("zerobase1@naver.com")
+                .nickname("닉네임")
+                .role(Role.USER)
+                .build();
 
-        Shop shop1 = Shop.builder().name("shop1").build();
-        Shop shop2 = Shop.builder().name("shop2").build();
-        Shop shop3 = Shop.builder().name("shop3").build();
+        Shop shop1 = Shop.builder().name("shop1")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
+                .build();
+        Shop shop2 = Shop.builder().name("shop2")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
+                .build();
+        Shop shop3 = Shop.builder().name("shop3")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
+                .build();
         List<Shop> shops = Arrays.asList(shop1, shop2, shop3);
 
         LocalDateTime of1 = LocalDateTime.of(2023, 5, 23, 0, 1);
@@ -116,9 +145,16 @@ class ReservationRepositoryQueryDslImplTest {
     @Test
     public void findAllBySearchConditions_startDateBetween() throws Exception {
         //given
-        Member member = Member.builder().email("zerobase1@naver.com").build();
+        Member member = Member.builder().email("zerobase1@naver.com")
+                .nickname("닉네임")
+                .role(Role.USER)
+                .build();
 
-        Shop shop = Shop.builder().name("shop1").build();
+        Shop shop = Shop.builder().name("shop1")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
+                .build();
 
         LocalDateTime of1 = LocalDateTime.of(2023, 5, 23, 0, 0);
         LocalDateTime of2 = LocalDateTime.of(2023, 5, 23, 23, 59);
@@ -152,6 +188,11 @@ class ReservationRepositoryQueryDslImplTest {
     }
 
     private static Reservation getBuild(Member member, Shop shop, LocalDateTime startDate, LocalDateTime endDate) {
-        return Reservation.builder().member(member).shop(shop).startDateTime(startDate).endDateTime(endDate).build();
+        return Reservation.builder()
+                .member(member)
+                .shop(shop)
+                .startDateTime(startDate)
+                .endDateTime(endDate)
+                .build();
     }
 }

@@ -13,12 +13,14 @@ import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.repository.reservation.ReservationRepository;
 import com.zerobase.reservation.repository.review.ReviewRepository;
 import com.zerobase.reservation.repository.shop.ShopRepository;
+import com.zerobase.reservation.type.Role;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -46,31 +48,36 @@ class ReviewServiceTest {
     @DisplayName("리뷰 등록")
     public void create() throws Exception {
         //given
-        Shop shop = Shop.builder().build();
-        Shop saveShop = shopRepository.save(shop);
-
         String email = "zerobase@naver.com";
         Member member = Member.builder()
                 .email(email)
+                .nickname("닉네임")
+                .role(Role.USER)
                 .build();
-        Member saveMember = memberRepository.save(member);
+
+        Shop shop = Shop.builder()
+                .name("shop1")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
+                .build();
+
+        shopRepository.save(shop);
+        memberRepository.save(member);
 
         Reservation reservation = Reservation.builder()
-                .member(saveMember)
-                .shop(saveShop)
-                .build();
-
-        Reservation reservation1 = Reservation.builder()
-                .member(saveMember)
-                .shop(saveShop)
+                .member(member)
+                .shop(shop)
+                .startDateTime(LocalDateTime.now())
+                .endDateTime(LocalDateTime.now())
                 .build();
         reservation.updateArrivalStatus();
-        reservation1.updateArrivalStatus();
-
         reservationRepository.save(reservation);
+
         int rating = 5;
         String content = "zerobase";
         String imageUrl = "imageUrl";
+
         //when
         ReviewDto reviewDto = reviewService.create(email, shop.getShopCode(), reservation.getReservationCode(),
                 rating, content, imageUrl);
@@ -103,7 +110,28 @@ class ReviewServiceTest {
     @DisplayName("리뷰 등록시 상점을 방문하지 않았으면 예외가 발생한다")
     public void create_shopNotVisited() throws Exception {
         //given
-        Reservation reservation = Reservation.builder().build();
+        Member member = Member.builder()
+                .email("zerobase@naver.com")
+                .nickname("닉네임")
+                .role(Role.USER)
+                .build();
+
+        Shop shop = Shop.builder()
+                .name("shop1")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
+                .build();
+
+        shopRepository.save(shop);
+        memberRepository.save(member);
+
+        Reservation reservation = Reservation.builder()
+                .member(member)
+                .shop(shop)
+                .startDateTime(LocalDateTime.now())
+                .endDateTime(LocalDateTime.now())
+                .build();
         reservationRepository.save(reservation);
         String email = "zerobase@naver.com";
         String shopCode = UUID.randomUUID().toString();
@@ -118,20 +146,48 @@ class ReviewServiceTest {
     @DisplayName("리뷰 등록시 이미 예약에 대해 리뷰가 존재하면 예외가 발생한다")
     public void create_alreadyExistReservation() throws Exception {
         //given
-        Reservation reservation = Reservation.builder().build();
-        Reservation saveReservation = reservationRepository.save(reservation);
+
         String email = "zerobase@naver.com";
-        String shopCode = UUID.randomUUID().toString();
+        Member member = Member.builder()
+                .email(email)
+                .nickname("닉네임")
+                .role(Role.USER)
+                .build();
+
+        Shop shop = Shop.builder()
+                .name("shop1")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
+                .build();
+
+        shopRepository.save(shop);
+        memberRepository.save(member);
+
+        Reservation reservation = Reservation.builder()
+                .member(member)
+                .shop(shop)
+                .startDateTime(LocalDateTime.now())
+                .endDateTime(LocalDateTime.now())
+                .build();
+
         reservation.updateArrivalStatus();
+        reservationRepository.save(reservation);
+
+
 
         Review review = Review.builder()
-                .reservation(saveReservation)
+                .reservation(reservation)
+                .member(member)
+                .shop(shop)
+                .rating(1)
+                .content("콘텐트")
                 .build();
         reviewRepository.save(review);
 
         //when //then
         ConflictException exception = assertThrows(ConflictException.class, () ->
-                reviewService.create(email, shopCode, reservation.getReservationCode(), 1, "content", "imageUrl"));
+                reviewService.create(email, shop.getShopCode(), reservation.getReservationCode(), 1, "content", "imageUrl"));
         Assertions.assertThat(exception.getErrorCode())
                 .isEqualTo(ErrorCode.ALREADY_EXIST_REVIEW);
 
@@ -141,16 +197,39 @@ class ReviewServiceTest {
     @DisplayName("리뷰 등록시 회원이 존재하지 않으면 예외가 발생한다")
     public void create_memberNotFound() throws Exception {
         //given
-        Reservation reservation = Reservation.builder().build();
-        reservationRepository.save(reservation);
-        reservation.updateArrivalStatus();
-        String email = "zerobase@naver.com";
-        String shopCode = UUID.randomUUID().toString();
 
+        Member member = Member.builder()
+                .email("zerobase@naver.com")
+                .nickname("닉네임")
+                .role(Role.USER)
+                .build();
+
+        Shop shop = Shop.builder()
+                .name("shop1")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
+                .build();
+
+        shopRepository.save(shop);
+        memberRepository.save(member);
+
+        Reservation reservation = Reservation.builder()
+                .member(member)
+                .shop(shop)
+                .startDateTime(LocalDateTime.now())
+                .endDateTime(LocalDateTime.now())
+                .build();
+
+        reservation.updateArrivalStatus();
+        reservationRepository.save(reservation);
+
+
+        String email = "email@nave.com";
         ArgumentException argumentException = new ArgumentException(ErrorCode.MEMBER_NOT_FOUND, email);
         //when
         ArgumentException exception = assertThrows(ArgumentException.class, () ->
-                reviewService.create(email, shopCode, reservation.getReservationCode(), 1, "content", "imageUrl"));
+                reviewService.create(email, shop.getShopCode(), reservation.getReservationCode(), 1, "content", "imageUrl"));
 
 
         //then
@@ -163,15 +242,36 @@ class ReviewServiceTest {
     @DisplayName("리뷰 등록시 상점이 존재하지 않으면 예외가 발생한다")
     public void create_shopNotFound() throws Exception {
         //given
-        Reservation reservation = Reservation.builder().build();
-        reservationRepository.save(reservation);
-        reservation.updateArrivalStatus();
+
         String email = "zerobase@naver.com";
-        String shopCode = UUID.randomUUID().toString();
         Member member = Member.builder()
                 .email(email)
+                .nickname("닉네임")
+                .role(Role.USER)
                 .build();
+
+        Shop shop = Shop.builder()
+                .name("shop1")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
+                .build();
+
+        shopRepository.save(shop);
         memberRepository.save(member);
+
+        Reservation reservation = Reservation.builder()
+                .member(member)
+                .shop(shop)
+                .startDateTime(LocalDateTime.now())
+                .endDateTime(LocalDateTime.now())
+                .build();
+
+        reservation.updateArrivalStatus();
+        reservationRepository.save(reservation);
+
+
+        String shopCode = UUID.randomUUID().toString();
 
         ArgumentException argumentException = new ArgumentException(ErrorCode.SHOP_NOT_FOUND, shopCode);
         //when
@@ -189,17 +289,37 @@ class ReviewServiceTest {
     @DisplayName("리뷰 상세조회")
     public void read() throws Exception {
         //given
-        Member member = Member.builder().build();
-        Member saveMember = memberRepository.save(member);
-        Shop shop = Shop.builder().build();
-        Shop saveShop = shopRepository.save(shop);
-        Reservation reservation = Reservation.builder().build();
-        Reservation saveReservation = reservationRepository.save(reservation);
+        String email = "zerobase@naver.com";
+        Member member = Member.builder()
+                .email(email)
+                .nickname("닉네임")
+                .role(Role.USER)
+                .build();
+
+        Shop shop = Shop.builder()
+                .name("shop1")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
+                .build();
+
+        shopRepository.save(shop);
+        memberRepository.save(member);
+
+        Reservation reservation = Reservation.builder()
+                .member(member)
+                .shop(shop)
+                .startDateTime(LocalDateTime.now())
+                .endDateTime(LocalDateTime.now())
+                .build();
+
+        reservation.updateArrivalStatus();
+        reservationRepository.save(reservation);
 
         Review review = Review.builder()
-                .member(saveMember)
-                .shop(saveShop)
-                .reservation(saveReservation)
+                .member(member)
+                .shop(shop)
+                .reservation(reservation)
                 .rating(1)
                 .content("content")
                 .imageUrl("imageUrl")

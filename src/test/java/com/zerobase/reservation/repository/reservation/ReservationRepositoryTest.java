@@ -6,6 +6,7 @@ import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.repository.shop.ShopRepository;
 import com.zerobase.reservation.type.ArrivalStatus;
+import com.zerobase.reservation.type.Role;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +34,14 @@ class ReservationRepositoryTest {
         //given
         Member member = Member.builder()
                 .email("zerobase@naver.com")
+                .nickname("닉네임")
+                .role(Role.USER)
                 .build();
         Shop shop = Shop.builder()
                 .name("shop1")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
                 .build();
         LocalDateTime startDateTime = LocalDateTime.of(2022, 05, 29, 0, 0);
         LocalDateTime endDateTime = LocalDateTime.of(2022, 06, 5, 0, 0);
@@ -63,8 +69,15 @@ class ReservationRepositoryTest {
     public void findByReservationCode() throws Exception {
         //given
         Member member = Member.builder()
+                .email("zerobase@naver.com")
+                .nickname("닉네임")
+                .role(Role.USER)
                 .build();
         Shop shop = Shop.builder()
+                .name("shop1")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
                 .build();
         LocalDateTime startDateTime = LocalDateTime.of(2022, 05, 23, 12, 0);
         LocalDateTime endDateTime = LocalDateTime.of(2022, 05, 23, 13, 0);

@@ -17,7 +17,12 @@ class ShopTest {
     @DisplayName("평점이 업데이트 돼야 한다")
     public void updateRating() throws Exception {
         //given
-        Shop shop = Shop.builder().build();
+        Shop shop = Shop.builder()
+                .name("상점1")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
+                .build();
         shopRepository.save(shop);
 
         //when
