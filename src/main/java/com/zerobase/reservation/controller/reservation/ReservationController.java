@@ -94,6 +94,15 @@ public class ReservationController {
         return ResponseEntity.ok().build();
     }
 
-    //TODO 예약 수정
+    /**
+     * 예약 수정
+     */
+    @PutMapping("/{reservationCode}")
+    @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
+    public ResponseEntity<?> update(@PathVariable String reservationCode,
+                                    @RequestBody UpdateReservationDto.Request request) {
+        reservationService.update(reservationCode, request.getStartDateTime(), request.getEndDateTime());
+        return ResponseEntity.ok().build();
+    }
 
 }

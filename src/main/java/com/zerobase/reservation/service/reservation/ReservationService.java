@@ -7,11 +7,9 @@ import com.zerobase.reservation.dto.reservation.ReservationDto;
 import com.zerobase.reservation.dto.reservation.SearchConditionReservationDto;
 import com.zerobase.reservation.global.exception.ArgumentException;
 import com.zerobase.reservation.global.exception.ConflictException;
-import com.zerobase.reservation.global.exception.ErrorCode;
 import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.repository.reservation.ReservationRepository;
 import com.zerobase.reservation.repository.shop.ShopRepository;
-import com.zerobase.reservation.type.ArrivalStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 import static com.zerobase.reservation.global.exception.ErrorCode.*;
-import static com.zerobase.reservation.type.ArrivalStatus.*;
+import static com.zerobase.reservation.type.ArrivalStatus.Y;
 
 @Service
 @RequiredArgsConstructor
@@ -78,7 +76,7 @@ public class ReservationService {
         Reservation reservation = getReservationBy(reservationCode);
 
         //예약 취소 - 방문 이후는 예약 취소할 수 없다
-        if(Y.equals(reservation.getArrivalStatus())){
+        if (Y.equals(reservation.getArrivalStatus())) {
             throw new ConflictException(VISITED_CAN_NOT_CANCEL);
         }
         reservationRepository.delete(reservation);
@@ -105,6 +103,26 @@ public class ReservationService {
         //방문 완료로 변경
         reservation.updateArrivalStatus();
 
+        return ReservationDto.of(reservation);
+    }
+
+    @Transactional
+    public ReservationDto update(String reservationCode, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+
+        Reservation reservation = getReservationBy(reservationCode);
+
+        //이미 방문한 예약은 변경 불가
+        if (Y.equals(reservation.getArrivalStatus())) {
+            throw new ConflictException(VISITED_CAN_NOT_CHANGE);
+        }
+
+        //예약 종료시간이 예약 시작시간 보다 이전인지 확인
+        validateEndTimeIsBefore(startDateTime, endDateTime);
+
+        //해당시간에 예약이 존재하는지 확인
+        isReservationExist(startDateTime, endDateTime, reservation.getShop());
+
+        reservation.updateReservation(startDateTime, endDateTime);
         return ReservationDto.of(reservation);
     }
 
