@@ -31,4 +31,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
     @Modifying(clearAutomatically = true)
     @Query("delete from Reservation r where r.member.id = :memberId")
     void deleteByMemberId(@Param("memberId") Long memberId);
+
+    @Modifying(clearAutomatically = true)
+    @Query("delete from Reservation r where r.shop.id = :shopId")
+    void deleteByShopId(@Param("shopId") Long shopId);
 }

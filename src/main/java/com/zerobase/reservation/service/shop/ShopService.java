@@ -2,13 +2,17 @@ package com.zerobase.reservation.service.shop;
 
 import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.domain.shop.MemberShop;
+import com.zerobase.reservation.domain.shop.MemberShopId;
 import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.shop.SearchConditionShopDto;
 import com.zerobase.reservation.dto.shop.ShopDto;
 import com.zerobase.reservation.dto.shop.ShopInfoDto;
 import com.zerobase.reservation.global.exception.ArgumentException;
+import com.zerobase.reservation.global.exception.ErrorCode;
 import com.zerobase.reservation.global.resolver.shop.PageRequest;
 import com.zerobase.reservation.repository.member.MemberRepository;
+import com.zerobase.reservation.repository.reservation.ReservationRepository;
+import com.zerobase.reservation.repository.review.ReviewRepository;
 import com.zerobase.reservation.repository.shop.MemberShopRepository;
 import com.zerobase.reservation.repository.shop.ShopRepository;
 import com.zerobase.reservation.repository.shop.mybatis.ShopMapper;
@@ -32,6 +36,8 @@ public class ShopService {
     private final ShopRepository shopRepository;
     private final MemberShopRepository memberShopRepository;
     private final MemberRepository memberRepository;
+    private final ReviewRepository reviewRepository;
+    private final ReservationRepository reservationRepository;
 
     /**
      * 상점 등록
@@ -62,12 +68,31 @@ public class ShopService {
         return shopMapper.findAllBySearchConditions(condition, pageRequest);
     }
 
-    /** 상점 수정 */
+    /**
+     * 상점 수정
+     */
     @Transactional
     public ShopDto update(String shopCode, String name, Double longitude, Double latitude) {
         Shop shop = getShopBy(shopCode);
         shop.updateShop(name, latitude, longitude);
         return ShopDto.of(shop);
+    }
+
+    /**
+     * 상점 삭제
+     */
+    @Transactional
+    public void delete(String shopCode) {
+        Shop shop = getShopBy(shopCode);
+
+        deleteChildTables(shop.getId());
+        shopRepository.delete(shop);
+    }
+
+    private void deleteChildTables(Long shopId) {
+        memberShopRepository.deleteByShopId(shopId);
+        reviewRepository.deleteByMemberId(shopId);
+        reservationRepository.deleteByMemberId(shopId);
     }
 
     private Member getMemberBy(String email) {
@@ -96,6 +121,4 @@ public class ShopService {
                 .build();
     }
 
-
-    /** 매장 삭제 **/
 }

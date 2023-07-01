@@ -68,6 +68,15 @@ public class ShopController {
         return ResponseEntity.ok().build();
     }
 
-    //TODO 상점 삭제
+    /**
+     * 상점 삭제
+     */
+    @DeleteMapping("/{shopCode}")
+    @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('SELLER')))")
+    public ResponseEntity<?> delete(@PathVariable String shopCode,
+                                    @RequestBody DeleteShopDto.Request request) {
+        shopService.delete(shopCode);
+        return ResponseEntity.ok().build();
+    }
 
 }

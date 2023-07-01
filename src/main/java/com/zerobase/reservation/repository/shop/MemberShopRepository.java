@@ -14,4 +14,8 @@ public interface MemberShopRepository extends JpaRepository<MemberShop, MemberSh
     @Modifying(clearAutomatically = true)
     @Query("delete from MemberShop ms where ms.member.id = :memberId")
     void deleteByMemberId(@Param("memberId") Long memberId);
+
+    @Modifying(clearAutomatically = true)
+    @Query("delete from MemberShop ms where ms.shop.id = :shopId")
+    void deleteByShopId(@Param("shopId") Long shopId);
 }

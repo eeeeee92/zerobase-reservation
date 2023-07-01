@@ -20,10 +20,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("delete from Review r where r.member.id = :memberId")
     void deleteByMemberId(@Param("memberId") Long memberId);
 
+    @Modifying(clearAutomatically = true)
+    @Query("delete from Review r where r.shop.id = :shopId")
+    void deleteByShopId(@Param("shopId") Long shopId);
+
     boolean existsByReservation(Reservation reservation);
-
-
-    List<Review> findAllByShop(Shop shop);
 
     @Query("select r.rating from Review r where r.shop.id = :shopId")
     List<Integer> findAllRatingByShopId(@Param("shopId") Long shopId);
