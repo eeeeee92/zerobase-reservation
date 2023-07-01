@@ -1,6 +1,7 @@
 package com.zerobase.reservation.controller.member;
 
 import com.zerobase.reservation.dto.member.DeleteMemberDto;
+import com.zerobase.reservation.dto.member.MemberInfoDetail;
 import com.zerobase.reservation.dto.member.SignupDto;
 import com.zerobase.reservation.dto.member.UpdateMemberDto;
 import com.zerobase.reservation.service.member.MemberService;
@@ -53,5 +54,13 @@ public class MemberController {
 
         memberService.delete(email, deleteMemberDto.getPassword());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{email}")
+    @PreAuthorize("isAuthenticated() and ((#email == principal.username))")
+    public ResponseEntity<MemberInfoDetail.Response> read(@PathVariable String email) {
+        return ResponseEntity.ok(
+                MemberInfoDetail.Response.of(memberService.getMember(email))
+        );
     }
 }

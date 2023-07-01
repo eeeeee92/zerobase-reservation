@@ -28,6 +28,9 @@ public class MemberService {
     private final ReviewRepository reviewRepository;
     private final ReservationRepository reservationRepository;
 
+    /**
+     * 회원 가입
+     */
     @Transactional
     public MemberDto signUp(String email, String nickname, String password, String phoneNumber, Role role) {
 
@@ -37,7 +40,9 @@ public class MemberService {
         return MemberDto.of(memberRepository.save(build(email, nickname, password, phoneNumber, role)));
     }
 
-
+    /**
+     * 회원 수정
+     */
     @Transactional
     public MemberDto update(String email, String password, String nickname, String imageUrl, String phoneNumber) {
 
@@ -55,6 +60,9 @@ public class MemberService {
     }
 
 
+    /**
+     * 회원 탈퇴
+     */
     @Transactional
     public void delete(String email, String password) {
         Member member = getMemberBy(email);
@@ -66,6 +74,13 @@ public class MemberService {
         deleteChildTables(member);
 
         memberRepository.delete(member);
+    }
+
+    /**
+     * 회원 단건 조회
+     */
+    public MemberDto getMember(String email) {
+        return MemberDto.of(getMemberBy(email));
     }
 
     private void deleteChildTables(Member member) {
@@ -108,7 +123,6 @@ public class MemberService {
             member.authorizeUser();
         }
     }
-
 
 
     private Member build(String email, String nickname, String password, String phoneNumber, Role role) {
