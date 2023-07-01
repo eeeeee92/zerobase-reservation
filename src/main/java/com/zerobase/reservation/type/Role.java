@@ -9,7 +9,8 @@ public enum Role {
 
     GUEST("ROLE_GUEST"),
     USER("ROLE_USER"),
-    SELLER("ROLE_SELLER");
+    SELLER("ROLE_SELLER"),
+    ADMIN("ROLE_ADMIN");
 
     private final String key;
 }
