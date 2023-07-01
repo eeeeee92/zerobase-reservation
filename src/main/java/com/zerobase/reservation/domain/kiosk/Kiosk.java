@@ -33,6 +33,7 @@ public class Kiosk {
     private LocalDate installationYear;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private InstallationStatus installationStatus;
 
 
@@ -42,6 +43,22 @@ public class Kiosk {
         this.kioskCode = UUID.randomUUID().toString();
         this.installationLocation = installationLocation;
         this.installationYear = installationYear;
-        this.installationStatus = InstallationStatus.Y;
+        this.installationStatus = InstallationStatus.N;
+    }
+
+    public void updateShop(Shop shop) {
+        this.shop = shop;
+    }
+
+    public void updateInstallationLocation(String installationLocation) {
+        this.installationLocation = installationLocation;
+    }
+
+    public void updateInstallationYear(LocalDate installationYear) {
+        this.installationYear = installationYear;
+    }
+
+    public void updateInstallationStatus(InstallationStatus installationStatus) {
+        this.installationStatus = installationStatus;
     }
 }
