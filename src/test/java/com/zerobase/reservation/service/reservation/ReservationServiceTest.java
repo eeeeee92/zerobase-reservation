@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.zerobase.reservation.global.exception.ErrorCode.ALREADY_EXIST_RESERVATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -473,5 +474,134 @@ class ReservationServiceTest {
 
         assertThat(exception).extracting("errorCode", "errorMessage")
                 .contains(ErrorCode.VISITED_CAN_NOT_CANCEL, ErrorCode.VISITED_CAN_NOT_CANCEL.getDescription());
+    }
+
+
+    @Test
+    @DisplayName("예약 수정")
+    public void update() throws Exception {
+        //given
+        String email = "zerobase@naver.com";
+        Member member = Member.builder()
+                .email(email)
+                .build();
+        Shop shop = Shop.builder()
+                .name("shop1")
+                .build();
+
+        LocalDateTime startDateTime = LocalDateTime.of(2022, 5, 22, 12, 0);
+        LocalDateTime endDateTime = LocalDateTime.of(2022, 5, 24, 12, 0);
+
+        LocalDateTime updateStartDateTime = LocalDateTime.of(2022, 5, 23, 12, 0);
+        LocalDateTime updateEndDateTime = LocalDateTime.of(2022, 5, 26, 12, 0);
+
+        Reservation reservation = Reservation.builder()
+                .member(member)
+                .shop(shop)
+                .startDateTime(startDateTime)
+                .endDateTime(endDateTime)
+                .build();
+
+        given(reservationRepository.findByReservationCode(any())).willReturn(Optional.of(reservation));
+
+        //when
+        ReservationDto reservationDto = reservationService.update(reservation.getReservationCode(), updateStartDateTime, updateEndDateTime);
+
+        //then
+        verify(reservationRepository, times(1)).existReservationBy(any(), any(), any());
+        assertThat(reservationDto.getMember()).isNotNull();
+        assertThat(reservationDto.getShop()).isNotNull();
+        assertThat(reservationDto).extracting("reservationCode", "startDateTime", "endDateTime", "arrivalStatus")
+                .contains(reservation.getReservationCode(), updateStartDateTime, updateEndDateTime, ArrivalStatus.N);
+    }
+
+
+    @Test
+    @DisplayName("예약 수정 시 예약이 존재하지 않으면 예외가 발생한다.")
+    public void update_reservationNotFound() throws Exception {
+        //given
+        LocalDateTime startDateTime = LocalDateTime.of(2022, 5, 22, 12, 0);
+        LocalDateTime endDateTime = LocalDateTime.of(2022, 5, 24, 12, 0);
+
+        String reservationCode = UUID.randomUUID().toString();
+
+        given(reservationRepository.findByReservationCode(any())).willReturn(Optional.empty());
+
+        ArgumentException argumentException = new ArgumentException(ErrorCode.RESERVATION_NOT_FOUND, reservationCode);
+
+        //when //then
+        ArgumentException exception = assertThrows(ArgumentException.class, () -> reservationService.update(reservationCode, startDateTime, endDateTime));
+
+        assertThat(exception).extracting("errorCode", "errorMessage")
+                .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
+    }
+
+    @Test
+    @DisplayName("예약 수정 시 이미 방문한 예약은 예외가 발생한다.")
+    public void update_visitedCanNotChange() throws Exception {
+        //given
+        LocalDateTime startDateTime = LocalDateTime.of(2022, 5, 22, 12, 0);
+        LocalDateTime endDateTime = LocalDateTime.of(2022, 5, 24, 12, 0);
+
+        Reservation reservation = Reservation.builder()
+                .startDateTime(startDateTime)
+                .endDateTime(endDateTime)
+                .build();
+        reservation.updateArrivalStatus();
+        given(reservationRepository.findByReservationCode(any())).willReturn(Optional.of(reservation));
+
+
+        //when //then
+        ConflictException exception = assertThrows(ConflictException.class, () -> reservationService.update(reservation.getReservationCode(), startDateTime, endDateTime));
+
+        assertThat(exception).extracting("errorCode", "errorMessage")
+                .contains(ErrorCode.VISITED_CAN_NOT_CHANGE, ErrorCode.VISITED_CAN_NOT_CHANGE.getDescription());
+    }
+
+    @Test
+    @DisplayName("예약 수정 시 종료시간이 시작시간 보다 빠르면 예외가 발생한다.")
+    public void update_endTimeMustBeAfter() throws Exception {
+        //given
+        LocalDateTime startDateTime = LocalDateTime.of(2022, 5, 24, 12, 0);
+        LocalDateTime endDateTime = LocalDateTime.of(2022, 5, 22, 12, 0);
+
+        Reservation reservation = Reservation.builder()
+                .startDateTime(startDateTime)
+                .endDateTime(endDateTime)
+                .build();
+
+        given(reservationRepository.findByReservationCode(any())).willReturn(Optional.of(reservation));
+        ArgumentException argumentException =
+                new ArgumentException(ErrorCode.END_TIME_MUST_BE_AFTER_START_TIME, String.format("start[%s], end[%s]", startDateTime, endDateTime));
+
+        //when //then
+        ArgumentException exception = assertThrows(ArgumentException.class, () -> reservationService.update(reservation.getReservationCode(), startDateTime, endDateTime));
+
+        assertThat(exception).extracting("errorCode", "errorMessage")
+                .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
+    }
+
+    @Test
+    @DisplayName("예약 수정 시 해당시간에 이미 예약이 존재하면 예외가 발생한다.")
+    public void update_alreadyExistReservation() throws Exception {
+        //given
+        LocalDateTime startDateTime = LocalDateTime.of(2022, 5, 22, 12, 0);
+        LocalDateTime endDateTime = LocalDateTime.of(2022, 5, 24, 12, 0);
+
+        Reservation reservation = Reservation.builder()
+                .startDateTime(startDateTime)
+                .endDateTime(endDateTime)
+                .build();
+
+        given(reservationRepository.findByReservationCode(any())).willReturn(Optional.of(reservation));
+        given(reservationRepository.existReservationBy(any(), any(), any())).willReturn(Optional.of(reservation));
+        ArgumentException argumentException = new ArgumentException(ALREADY_EXIST_RESERVATION,
+                String.format("%s or %s", startDateTime, endDateTime));
+
+        //when //then
+        ArgumentException exception = assertThrows(ArgumentException.class, () -> reservationService.update(reservation.getReservationCode(), startDateTime, endDateTime));
+
+        assertThat(exception).extracting("errorCode", "errorMessage")
+                .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
     }
 }

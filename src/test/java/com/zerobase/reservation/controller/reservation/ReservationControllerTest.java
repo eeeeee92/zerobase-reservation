@@ -5,10 +5,7 @@ import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.domain.reservation.Reservation;
 import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.kiosk.KioskDto;
-import com.zerobase.reservation.dto.reservation.CreateReservationDto;
-import com.zerobase.reservation.dto.reservation.DeleteReservationDto;
-import com.zerobase.reservation.dto.reservation.ReservationDto;
-import com.zerobase.reservation.dto.reservation.UpdateReservationArrivalDto;
+import com.zerobase.reservation.dto.reservation.*;
 import com.zerobase.reservation.service.kiosk.KioskService;
 import com.zerobase.reservation.service.reservation.ReservationService;
 import com.zerobase.reservation.type.ArrivalStatus;
@@ -269,6 +266,36 @@ class ReservationControllerTest {
 
         //when //then
         mockMvc.perform(MockMvcRequestBuilders.delete("/reservations/{reservationCode}", reservationCode)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                ).andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("예약 수정")
+    @WithMockUser
+    public void update() throws Exception {
+        //given
+        String reservationCode = UUID.randomUUID().toString();
+        LocalDateTime startDateTime = LocalDateTime.now();
+        LocalDateTime endDateTime = LocalDateTime.now();
+        UpdateReservationDto.Request request = UpdateReservationDto.Request.builder()
+                .email("zerobase@naver.com")
+                .startDateTime(startDateTime)
+                .endDateTime(endDateTime)
+                .build();
+
+        String json = objectMapper.writeValueAsString(request);
+
+        ReservationDto reservationDto = ReservationDto.builder()
+                .build();
+        given(reservationService.update(any(), any(), any()))
+                .willReturn(reservationDto);
+
+        //when //then
+        mockMvc.perform(MockMvcRequestBuilders.put("/reservations/{reservationCode}", reservationCode)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
