@@ -20,7 +20,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping
-    @PreAuthorize("isAuthenticated() and ((request.email == principal.username) and (hasRole('USER')))")
+    @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
     public ResponseEntity<?> create(@Valid @RequestBody CreateReviewDto.Request request) {
 
         reviewService.create(request.getEmail(), request.getShopCode(),

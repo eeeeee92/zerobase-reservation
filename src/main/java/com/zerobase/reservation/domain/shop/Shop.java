@@ -30,7 +30,6 @@ public class Shop {
     @Column(nullable = false)
     private Double longitude;
 
-    @Column(nullable = false)
     private Double rating;
 
 
