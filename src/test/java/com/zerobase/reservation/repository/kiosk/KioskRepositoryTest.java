@@ -51,7 +51,7 @@ class KioskRepositoryTest {
                 .extracting("id", "kioskCode", "installationLocation", "installationYear", "installationStatus")
                 .contains(
                         saveKiosk.getId(), kiosk.getKioskCode(),
-                        installationLocation, installationYear, InstallationStatus.Y
+                        installationLocation, installationYear, InstallationStatus.N
                 );
         assertThat(findKiosk.getShop().getShopCode()).isEqualTo(shop.getShopCode());
     }

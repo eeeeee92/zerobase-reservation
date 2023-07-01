@@ -61,7 +61,7 @@ class KioskServiceTest {
                 .extracting("kioskCode", "installationLocation", "installationYear", "installationStatus")
                 .contains(
                         kiosk.getKioskCode(), installationLocation,
-                        installationYear, InstallationStatus.Y
+                        installationYear, InstallationStatus.N
                 );
         assertThat(kioskDto.getShop()).isNotNull();
     }

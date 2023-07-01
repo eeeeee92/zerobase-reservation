@@ -92,6 +92,13 @@ class ReservationControllerTest {
         LocalDateTime startDateTime3 = LocalDateTime.now().plusDays(3);
         LocalDateTime endDateTime4 = LocalDateTime.now().plusDays(4);
 
+        String s1 = dateFormat(startDateTime1);
+        String s = dateFormat(endDateTime2);
+
+        LocalDateTime startDateTime = LocalDateTime.parse(s1);
+        LocalDateTime endDateTime = LocalDateTime.parse(s);
+
+
         String nickname = "zerobase";
         String phoneNumber = "01000000000";
         Member member = Member.builder()
@@ -117,8 +124,8 @@ class ReservationControllerTest {
                 .member(member)
                 .shop(shop)
                 .arrivalStatus(ArrivalStatus.N)
-                .startDateTime(startDateTime1)
-                .endDateTime(endDateTime2)
+                .startDateTime(startDateTime)
+                .endDateTime(endDateTime)
                 .build();
         ReservationDto reservation1 = ReservationDto.builder()
                 .reservationCode(reservationCode2)
@@ -152,8 +159,8 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.content[0].latitude").value(latitude))
                 .andExpect(jsonPath("$.content[0].longitude").value(longitude))
                 .andExpect(jsonPath("$.content[0].arrivalStatus").value(ArrivalStatus.N.getDescription()))
-                .andExpect(jsonPath("$.content[0].startDateTime").value(startDateTime1.toString()))
-                .andExpect(jsonPath("$.content[0].endDateTime").value(endDateTime2.toString()));
+                .andExpect(jsonPath("$.content[0].startDateTime").value(dateFormat(startDateTime1)))
+                .andExpect(jsonPath("$.content[0].endDateTime").value(dateFormat(endDateTime2)));
 
     }
 
