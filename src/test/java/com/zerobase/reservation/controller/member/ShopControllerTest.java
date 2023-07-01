@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerobase.reservation.controller.shop.ShopController;
 import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.shop.CreateShopDto;
+import com.zerobase.reservation.dto.shop.DeleteShopDto;
 import com.zerobase.reservation.dto.shop.ShopDto;
 import com.zerobase.reservation.dto.shop.UpdateShopDto;
 import com.zerobase.reservation.service.shop.ShopService;
@@ -173,6 +174,30 @@ public class ShopControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    @DisplayName("상점 삭제")
+    @WithMockUser
+    public void delete() throws Exception {
+        //given
+        String shopCode = UUID.randomUUID().toString();
+        DeleteShopDto.Request request = DeleteShopDto.Request.builder()
+                .email("zerobase@naver.com")
+                .build();
+
+        String json = objectMapper.writeValueAsString(request);
+
+        //when //then
+        mockMvc.perform(MockMvcRequestBuilders.delete("/shops/{shopCode}", shopCode)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+
     private static CreateShopDto.Request getRequest(String email, String name, double latitude, double longitude) {
         return CreateShopDto.Request.builder()
                 .email(email)
@@ -181,6 +206,4 @@ public class ShopControllerTest {
                 .longitude(longitude)
                 .build();
     }
-
-
 }

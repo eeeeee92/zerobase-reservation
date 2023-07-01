@@ -8,6 +8,8 @@ import com.zerobase.reservation.dto.shop.ShopDto;
 import com.zerobase.reservation.global.exception.ArgumentException;
 import com.zerobase.reservation.global.exception.ErrorCode;
 import com.zerobase.reservation.repository.member.MemberRepository;
+import com.zerobase.reservation.repository.reservation.ReservationRepository;
+import com.zerobase.reservation.repository.review.ReviewRepository;
 import com.zerobase.reservation.repository.shop.MemberShopRepository;
 import com.zerobase.reservation.repository.shop.ShopRepository;
 import org.assertj.core.api.Assertions;
@@ -40,6 +42,12 @@ class ShopServiceTest {
 
     @MockBean
     MemberRepository memberRepository;
+
+    @MockBean
+    ReviewRepository reviewRepository;
+
+    @MockBean
+    ReservationRepository reservationRepository;
 
     @Test
     @DisplayName("상점을 등록한다")
@@ -171,6 +179,53 @@ class ShopServiceTest {
 
         //when
         ArgumentException exception = assertThrows(ArgumentException.class, () -> shopService.update(shop.getShopCode(), "상점변경", 12.3, 12.1));
+        //then
+        Assertions.assertThat(exception)
+                .extracting("errorCode", "errorMessage")
+                .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
+    }
+
+    @Test
+    @DisplayName("상점 삭제")
+    public void delete() throws Exception {
+        //given
+        String shopCode = UUID.randomUUID().toString();
+        Shop shop = Shop.builder()
+                .name("상점")
+                .longitude(12.0)
+                .latitude(12.1)
+                .build();
+
+        given(shopRepository.findByShopCode(any()))
+                .willReturn(Optional.of(shop));
+
+        //when
+        shopService.delete(shopCode);
+
+        //then
+        verify(shopRepository, times(1)).findByShopCode(any());
+        verify(shopRepository, times(1)).delete(shop);
+    }
+
+
+    @Test
+    @DisplayName("상점 삭제시 상점이 존재하지 않으면 예외가 발생한다")
+    public void delete_shopNotFound() throws Exception {
+        //given
+        Shop shop = Shop.builder()
+                .name("상점")
+                .latitude(12.1)
+                .longitude(12.3)
+                .build();
+        given(shopRepository.findByShopCode(any()))
+                .willReturn(Optional.empty());
+
+
+        ArgumentException argumentException = new ArgumentException(ErrorCode.SHOP_NOT_FOUND, shop.getShopCode());
+
+
+        //when
+        ArgumentException exception = assertThrows(ArgumentException.class, () -> shopService.delete(shop.getShopCode()));
         //then
         Assertions.assertThat(exception)
                 .extracting("errorCode", "errorMessage")
