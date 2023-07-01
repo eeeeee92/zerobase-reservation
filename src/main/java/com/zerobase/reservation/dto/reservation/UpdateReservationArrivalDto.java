@@ -6,7 +6,6 @@ public class UpdateReservationArrivalDto {
 
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @Getter
-    @Setter
     public static class Request {
 
         private String email;
