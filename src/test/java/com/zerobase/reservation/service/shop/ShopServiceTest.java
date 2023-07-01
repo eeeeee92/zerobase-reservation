@@ -10,6 +10,7 @@ import com.zerobase.reservation.global.exception.ErrorCode;
 import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.repository.shop.MemberShopRepository;
 import com.zerobase.reservation.repository.shop.ShopRepository;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,6 +130,49 @@ class ShopServiceTest {
         //when //then
         ArgumentException exception = assertThrows(ArgumentException.class, () -> shopService.getShop(shopCode));
         assertThat(exception)
+                .extracting("errorCode", "errorMessage")
+                .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
+    }
+
+
+    @Test
+    @DisplayName("상점 수정")
+    public void update() throws Exception {
+        //given
+        Shop shop = Shop.builder()
+                .name("상점")
+                .latitude(12.1)
+                .longitude(12.3)
+                .build();
+        given(shopRepository.findByShopCode(any()))
+                .willReturn(Optional.of(shop));
+
+        //when
+        ShopDto shopDto = shopService.update(shop.getShopCode(), "상점변경", 12.3, 12.1);
+        //then
+        Assertions.assertThat(shopDto)
+                .extracting("shopCode", "name", "latitude" ,"longitude")
+                .contains(shop.getShopCode(), "상점변경", 12.1, 12.3);
+    }
+
+    @Test
+    @DisplayName("상점 수정시 상점이 존재하지 않으면 예외가 발생한다")
+    public void update_shopNotFound() throws Exception {
+        //given
+        Shop shop = Shop.builder()
+                .name("상점")
+                .latitude(12.1)
+                .longitude(12.3)
+                .build();
+        given(shopRepository.findByShopCode(any()))
+                .willReturn(Optional.empty());
+        ArgumentException argumentException = new ArgumentException(ErrorCode.SHOP_NOT_FOUND, shop.getShopCode());
+
+
+        //when
+        ArgumentException exception = assertThrows(ArgumentException.class, () -> shopService.update(shop.getShopCode(), "상점변경", 12.3, 12.1));
+        //then
+        Assertions.assertThat(exception)
                 .extracting("errorCode", "errorMessage")
                 .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
     }
