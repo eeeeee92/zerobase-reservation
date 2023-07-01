@@ -418,4 +418,60 @@ class ReservationServiceTest {
         assertThat(exception).extracting("errorCode", "errorMessage")
                 .contains(conflictException.getErrorCode(), conflictException.getErrorMessage());
     }
+
+    @Test
+    @DisplayName("예약 취소")
+    public void delete() throws Exception {
+        //given
+        String reservationCode = UUID.randomUUID().toString();
+        Reservation reservation = Reservation.builder()
+                .build();
+        given(reservationRepository.findByReservationCode(any()))
+                .willReturn(Optional.of(reservation));
+
+        //when
+        reservationService.delete(reservationCode);
+
+        //then
+        verify(reservationRepository, times(1)).delete(any());
+    }
+
+    @Test
+    @DisplayName("예약 취소시 예약이 존재하지 않으면 예외가 발생한다")
+    public void delete_reservationNotFound() throws Exception {
+        //given
+
+        Reservation reservation = Reservation.builder()
+                .build();
+        ArgumentException argumentException = new ArgumentException(ErrorCode.RESERVATION_NOT_FOUND, reservation.getReservationCode());
+        given(reservationRepository.findByReservationCode(any()))
+                .willReturn(Optional.empty());
+        //when //then
+        ArgumentException exception = assertThrows(ArgumentException.class,
+                () -> reservationService.delete(reservation.getReservationCode()));
+
+        assertThat(exception).extracting("errorCode", "errorMessage")
+                .contains(argumentException.getErrorCode(), argumentException.getErrorMessage());
+    }
+
+    @Test
+    @DisplayName("예약 취소시 이미 방문 완료일 시 예외가 발생한다")
+    public void delete_visitedCanNotCancel() throws Exception {
+        //given
+
+        String reservationCode = UUID.randomUUID().toString();
+        Reservation reservation = Reservation.builder()
+                .build();
+        reservation.updateArrivalStatus();
+        given(reservationRepository.findByReservationCode(any()))
+                .willReturn(Optional.of(reservation));
+
+
+        //when //then
+        ConflictException exception = assertThrows(ConflictException.class,
+                () -> reservationService.delete(reservationCode));
+
+        assertThat(exception).extracting("errorCode", "errorMessage")
+                .contains(ErrorCode.VISITED_CAN_NOT_CANCEL, ErrorCode.VISITED_CAN_NOT_CANCEL.getDescription());
+    }
 }

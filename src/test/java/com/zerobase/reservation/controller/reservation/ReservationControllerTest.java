@@ -6,6 +6,7 @@ import com.zerobase.reservation.domain.reservation.Reservation;
 import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.kiosk.KioskDto;
 import com.zerobase.reservation.dto.reservation.CreateReservationDto;
+import com.zerobase.reservation.dto.reservation.DeleteReservationDto;
 import com.zerobase.reservation.dto.reservation.ReservationDto;
 import com.zerobase.reservation.dto.reservation.UpdateReservationArrivalDto;
 import com.zerobase.reservation.service.kiosk.KioskService;
@@ -22,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -245,6 +247,26 @@ class ReservationControllerTest {
                 ).andDo(print())
                 .andExpect(status().isOk());
 
+    }
+
+    @Test
+    @DisplayName("예약 취소")
+    @WithMockUser
+    public void delete() throws Exception {
+        //given
+        String reservationCode = UUID.randomUUID().toString();
+        DeleteReservationDto.Request request = DeleteReservationDto.Request.builder()
+                .email("zerobase@naver.com")
+                .build();
+        String json = objectMapper.writeValueAsString(request);
+
+        //when //then
+        mockMvc.perform(MockMvcRequestBuilders.delete("/reservations/{reservationCode}", reservationCode)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                ).andDo(print())
+                .andExpect(status().isOk());
     }
 
     private static String dateFormat(LocalDateTime dateTime) {
