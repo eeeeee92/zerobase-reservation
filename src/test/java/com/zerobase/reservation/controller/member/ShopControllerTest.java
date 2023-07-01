@@ -2,8 +2,10 @@ package com.zerobase.reservation.controller.member;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerobase.reservation.controller.shop.ShopController;
+import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.shop.CreateShopDto;
 import com.zerobase.reservation.dto.shop.ShopDto;
+import com.zerobase.reservation.dto.shop.UpdateShopDto;
 import com.zerobase.reservation.service.shop.ShopService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -142,6 +144,33 @@ public class ShopControllerTest {
                 .andExpect(jsonPath("$.rating").value(rating))
                 .andExpect(jsonPath("$.latitude").value(latitude))
                 .andExpect(jsonPath("$.longitude").value(longitude));
+    }
+
+
+    @Test
+    @DisplayName("상점 수정")
+    @WithMockUser
+    public void update() throws Exception {
+        //given
+        String shopCode = UUID.randomUUID().toString();
+        UpdateShopDto.Request request = UpdateShopDto.Request.builder()
+                .email("zerobase@naver.com")
+                .name("상점이름")
+                .longitude(12.1)
+                .latitude(12.3)
+                .build();
+
+        String json = objectMapper.writeValueAsString(request);
+
+        //when //then
+        mockMvc.perform(MockMvcRequestBuilders.put("/shops/{shopCode}", shopCode)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 
     private static CreateShopDto.Request getRequest(String email, String name, double latitude, double longitude) {

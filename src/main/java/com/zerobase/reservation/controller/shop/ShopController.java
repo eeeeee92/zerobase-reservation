@@ -57,7 +57,17 @@ public class ShopController {
         );
     }
 
-    //TODO 상점 정보 수정
+    /**
+     * 상점 수정
+     */
+    @PutMapping("/{shopCode}")
+    @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('SELLER')))")
+    public ResponseEntity<?> update(@PathVariable String shopCode,
+            @RequestBody UpdateShopDto.Request request){
+        shopService.update(shopCode, request.getName(), request.getLongitude(), request.getLatitude());
+        return ResponseEntity.ok().build();
+    }
+
     //TODO 상점 삭제
 
 }

@@ -43,6 +43,12 @@ public class Shop {
 
     }
 
+    public void updateShop(String name, Double latitude, Double longitude) {
+        this.name = name;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
     public void updateRating(Double rating) {
         this.rating = rating;
     }

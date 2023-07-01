@@ -62,6 +62,14 @@ public class ShopService {
         return shopMapper.findAllBySearchConditions(condition, pageRequest);
     }
 
+    /** 상점 수정 */
+    @Transactional
+    public ShopDto update(String shopCode, String name, Double longitude, Double latitude) {
+        Shop shop = getShopBy(shopCode);
+        shop.updateShop(name, latitude, longitude);
+        return ShopDto.of(shop);
+    }
+
     private Member getMemberBy(String email) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(() -> new ArgumentException(MEMBER_NOT_FOUND, email));
@@ -87,6 +95,7 @@ public class ShopService {
                 .longitude(longitude)
                 .build();
     }
+
 
     /** 매장 삭제 **/
 }
