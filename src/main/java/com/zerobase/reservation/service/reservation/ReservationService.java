@@ -7,9 +7,11 @@ import com.zerobase.reservation.dto.reservation.ReservationDto;
 import com.zerobase.reservation.dto.reservation.SearchConditionReservationDto;
 import com.zerobase.reservation.global.exception.ArgumentException;
 import com.zerobase.reservation.global.exception.ConflictException;
+import com.zerobase.reservation.global.exception.ErrorCode;
 import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.repository.reservation.ReservationRepository;
 import com.zerobase.reservation.repository.shop.ShopRepository;
+import com.zerobase.reservation.type.ArrivalStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 import static com.zerobase.reservation.global.exception.ErrorCode.*;
+import static com.zerobase.reservation.type.ArrivalStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -67,7 +70,23 @@ public class ReservationService {
         return ReservationDto.of(getReservationBy(reservationCode));
     }
 
+    /**
+     * 예약 취소
+     */
+    @Transactional
+    public void delete(String reservationCode) {
+        Reservation reservation = getReservationBy(reservationCode);
 
+        //예약 취소 - 방문 이후는 예약 취소할 수 없다
+        if(Y.equals(reservation.getArrivalStatus())){
+            throw new ConflictException(VISITED_CAN_NOT_CANCEL);
+        }
+        reservationRepository.delete(reservation);
+    }
+
+    /**
+     * 도착 요청
+     */
     @Transactional
     public ReservationDto updateArrival(String reservationCode, String shopCode, LocalDateTime now) {
         Reservation reservation = getReservationBy(reservationCode);
@@ -143,5 +162,6 @@ public class ReservationService {
                 .endDateTime(endDateTime)
                 .build();
     }
+
 
 }

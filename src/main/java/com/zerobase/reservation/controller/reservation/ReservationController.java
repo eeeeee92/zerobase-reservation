@@ -83,7 +83,17 @@ public class ReservationController {
         return ResponseEntity.ok().build();
     }
 
-    //TODO 예약 취소
+    /**
+     * 예약 취소
+     */
+    @DeleteMapping("/{reservationCode}")
+    @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
+    public ResponseEntity<?> delete(@PathVariable String reservationCode,
+                                    @RequestBody DeleteReservationDto.Request request) {
+        reservationService.delete(reservationCode);
+        return ResponseEntity.ok().build();
+    }
+
     //TODO 예약 수정
 
 }

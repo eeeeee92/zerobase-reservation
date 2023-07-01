@@ -22,6 +22,7 @@ public enum ErrorCode {
     SHOP_NOT_VISITED("방문하지 않은 상점의 리뷰는 작성할 수 없습니다."),
     ALREADY_EXIST_REVIEW("이미 작성 된 리뷰가 존재합니다."),
     REVIEW_NOT_FOUND("리뷰가 존재하지 않습니다"),
+    VISITED_CAN_NOT_CANCEL("이미 방문했던 예약은 취소할 수 없습니다."),
     INTERNAL_SERVER_ERROR("서버에 문제가 발생했습니다. 잠시 후 다시 요청 해주세요");
 
 
