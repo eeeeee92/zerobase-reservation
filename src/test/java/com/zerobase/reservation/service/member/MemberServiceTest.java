@@ -253,6 +253,8 @@ class MemberServiceTest {
     }
 
 
+    //TODO 회원 단건 조회 테스트
+
     private static Member getMemberEntity(String email, String nickname, String phoneNumber, Role role) {
         return Member.builder()
                 .email(email)

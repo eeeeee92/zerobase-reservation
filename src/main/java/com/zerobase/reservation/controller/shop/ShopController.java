@@ -24,6 +24,9 @@ public class ShopController {
 
     private final ShopService shopService;
 
+    /**
+     * 상점 등록
+     */
     @PostMapping
     @PreAuthorize("isAuthenticated() and (hasRole('SELLER'))")
     public ResponseEntity<?> create(@Valid @RequestBody CreateShopDto.Request request) {
@@ -31,6 +34,9 @@ public class ShopController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * 상점 단건조회
+     */
     @GetMapping("/{shopCode}")
     public ResponseEntity<ShopInfoDetailDto.Response> read(@PathVariable String shopCode) {
         ShopDto shopDto = shopService.getShop(shopCode);
@@ -39,6 +45,9 @@ public class ShopController {
         );
     }
 
+    /**
+     * 상점 전체조회 (검색조건별)
+     */
     @GetMapping
     public ResponseEntity<PageInfo<ShopInfoDto.Response>> readAll(@PageDefault(sort = NAME) PageRequest pageRequest,
                                                                   SearchConditionShopDto searchConditionShopDto) {
@@ -48,5 +57,7 @@ public class ShopController {
         );
     }
 
+    //TODO 상점 정보 수정
+    //TODO 상점 삭제
 
 }

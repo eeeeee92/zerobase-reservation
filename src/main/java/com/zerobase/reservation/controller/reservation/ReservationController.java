@@ -27,6 +27,9 @@ public class ReservationController {
 
     private final KioskService kioskService;
 
+    /**
+     * 예약
+     */
     @PostMapping
     @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
     public ResponseEntity<?> create(@Valid @RequestBody CreateReservationDto.Request request) {
@@ -40,6 +43,9 @@ public class ReservationController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * 예약 전체조회 (검색조건별)
+     */
     @GetMapping
     @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) or (hasRole('SELLER')))")
     public ResponseEntity<Page<ReservationInfoDto.Response>> readAllByCondition(
@@ -51,6 +57,9 @@ public class ReservationController {
         );
     }
 
+    /**
+     * 예약 단건조회
+     */
     @GetMapping("/{reservationCode}")
     @PreAuthorize("isAuthenticated() and (hasRole('USER') or (hasRole('SELLER')))")
     @PostAuthorize("returnObject.body.reservationEmail == principal.username or hasRole('SELLER')")
@@ -61,6 +70,9 @@ public class ReservationController {
         );
     }
 
+    /**
+     * 도착 요청
+     */
     @PutMapping("/{reservationCode}/arrival")
     @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
     public ResponseEntity<?> arrival(@PathVariable String reservationCode,
@@ -70,5 +82,8 @@ public class ReservationController {
         reservationService.updateArrival(reservationCode, kiosk.getShop().getShopCode(), LocalDateTime.now());
         return ResponseEntity.ok().build();
     }
+
+    //TODO 예약 취소
+    //TODO 예약 수정
 
 }

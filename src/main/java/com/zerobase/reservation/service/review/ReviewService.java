@@ -30,7 +30,9 @@ public class ReviewService {
     private final ShopRepository shopRepository;
 
 
-    /** 리뷰 등록 */
+    /**
+     * 리뷰 등록
+     */
     @Transactional
     public ReviewDto create(String email, String shopCode, String reservationCode, Integer rating, String content, String imageUrl) {
         Reservation reservation = getReservationBy(reservationCode);
@@ -50,7 +52,9 @@ public class ReviewService {
     }
 
 
-    /** 리뷰 상세조회 */
+    /**
+     * 리뷰 상세조회
+     */
     public ReviewDto getReview(String reviewCode) {
         return ReviewDto.of(reviewRepository.findByReviewCode(reviewCode)
                 .orElseThrow(() -> new ArgumentException(ErrorCode.REVIEW_NOT_FOUND, reviewCode)));

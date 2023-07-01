@@ -25,6 +25,9 @@ public class KioskService {
     private final KioskRepository kioskRepository;
     private final ShopRepository shopRepository;
 
+    /**
+     * 키오스크 단건조회
+     */
     @Transactional
     public KioskDto getKiosk(String kioskCode) {
         Kiosk kiosk = kioskRepository.findByKioskCode(kioskCode)
@@ -32,13 +35,18 @@ public class KioskService {
         return KioskDto.of(kiosk);
     }
 
-
+    /**
+     * 키오스크 등록
+     */
     public KioskDto registration() {
         return KioskDto.of(kioskRepository.save(Kiosk.builder()
                 .build())
         );
     }
 
+    /**
+     * 키오스크 설치
+     */
     @Transactional
     public KioskDto installation(String shopCode, String kioskCode, LocalDate installationYear, String installationLocation) {
         Shop shop = shopRepository.findByShopCode(shopCode)

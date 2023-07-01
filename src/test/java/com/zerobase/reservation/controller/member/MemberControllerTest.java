@@ -97,6 +97,8 @@ class MemberControllerTest {
                 .andExpect(status().isOk());
     }
 
+    //TODO 회원 단건조회 테스트
+
     private static SignupDto getDto() {
         return SignupDto.builder()
                 .email("zerobase@naver.com")

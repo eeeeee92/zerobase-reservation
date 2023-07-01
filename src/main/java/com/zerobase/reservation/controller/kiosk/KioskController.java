@@ -16,6 +16,9 @@ public class KioskController {
 
     private final KioskService kioskService;
 
+    /**
+     * 키오스크 설치
+     */
     @PutMapping("/{kioskCode}")
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN'))")
     public ResponseEntity<?> installation(@PathVariable String kioskCode,
@@ -29,5 +32,10 @@ public class KioskController {
 
         return ResponseEntity.ok().build();
     }
+
+    //TODO 등록
+    //TODO 삭제
+    //TODO 단건 조회
+    //TODO 설치되지 않은 단말조회 (검색 조건 별 전체조회)
 
 }

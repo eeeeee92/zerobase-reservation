@@ -90,13 +90,13 @@ public class ReservationService {
     }
 
     private static void isShopMatchingReservation(Shop reservationShop, Shop shop) {
-        if(!reservationShop.getShopCode().equals(shop.getShopCode())){
+        if (!reservationShop.getShopCode().equals(shop.getShopCode())) {
             throw new ArgumentException(UN_MATCH_SHOP_CODE, shop.getShopCode());
         }
     }
 
     private static void validateVisitationTime(LocalDateTime now, LocalDateTime endTime, LocalDateTime arrivalTimeRange) {
-        if(arrivalTimeRange.isAfter(now) || now.isAfter(endTime)){
+        if (arrivalTimeRange.isAfter(now) || now.isAfter(endTime)) {
             throw new ConflictException(INVALID_TIME, now.toString());
         }
     }

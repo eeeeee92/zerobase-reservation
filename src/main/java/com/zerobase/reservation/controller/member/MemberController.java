@@ -21,6 +21,9 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    /**
+     * 회원가입
+     */
     @PostMapping("/sign-up")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignupDto signupDto) {
         memberService.signUp(
@@ -32,7 +35,9 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
 
-
+    /**
+     * 회원수정
+     */
     @PutMapping("/{email}")
     @PreAuthorize("isAuthenticated() and ((#email == principal.username))")
     public ResponseEntity<?> update(@PathVariable String email,
@@ -47,6 +52,9 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * 회원 탈퇴
+     */
     @DeleteMapping("/{email}")
     @PreAuthorize("isAuthenticated() and ((#email == principal.username))")
     public ResponseEntity<?> delete(@PathVariable String email,
@@ -56,6 +64,9 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * 회원 단건 조회
+     */
     @GetMapping("/{email}")
     @PreAuthorize("isAuthenticated() and ((#email == principal.username))")
     public ResponseEntity<MemberInfoDetail.Response> read(@PathVariable String email) {
@@ -63,4 +74,6 @@ public class MemberController {
                 MemberInfoDetail.Response.of(memberService.getMember(email))
         );
     }
+
+    //TODO 회원 전체조회 (검색 조건 별)
 }
