@@ -22,7 +22,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -67,7 +70,7 @@ class KioskControllerTest {
         String json = objectMapper.writeValueAsString(request);
 
         //when //then
-        mockMvc.perform(put("/kiosks/{kioskCode}", kioskCode)
+        mockMvc.perform(put("/kiosks/installation/{kioskCode}", kioskCode)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -121,6 +124,21 @@ class KioskControllerTest {
 
         //when //then
         mockMvc.perform(MockMvcRequestBuilders.delete("/kiosks/{kioskCode}", kioskCode)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                ).andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("키오스크 설치해제")
+    @WithMockUser
+    public void uninstall() throws Exception {
+        //given
+        String kioskCode = UUID.randomUUID().toString();
+
+        //when //then
+        mockMvc.perform(MockMvcRequestBuilders.put("/kiosks/uninstall/{kioskCode}", kioskCode)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                 ).andDo(print())

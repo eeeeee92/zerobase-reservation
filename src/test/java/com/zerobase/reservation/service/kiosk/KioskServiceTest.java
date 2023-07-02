@@ -118,5 +118,31 @@ class KioskServiceTest {
         verify(kioskRepository, times(1)).delete(any());
     }
 
+    @Test
+    @DisplayName("키오스크 설치해제")
+    public void unInstall() throws Exception {
+        //given
+        String kioskCode = UUID.randomUUID().toString();
+        given(kioskRepository.findByKioskCode(any()))
+                .willReturn(Optional.of(
+                        Kiosk.builder()
+                                .shop(Shop.builder().build())
+                                .installationYear(LocalDate.of(2023, 05, 23))
+                                .installationLocation("현관")
+                                .build()
+                ));
+
+        //when
+        KioskDto kioskDto = kioskService.unInstall(kioskCode);
+
+        //then
+        Assertions.assertThat(kioskDto)
+                .extracting("shop", "kioskCode", "installationYear", "installationLocation")
+                .containsNull();
+        Assertions.assertThat(kioskDto.getInstallationStatus())
+                .isEqualTo(InstallationStatus.N);
+
+    }
+
 
 }
