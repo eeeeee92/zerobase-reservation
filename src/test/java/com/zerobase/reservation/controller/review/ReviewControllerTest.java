@@ -7,6 +7,7 @@ import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.review.CreateReviewDto;
 import com.zerobase.reservation.dto.review.DeleteReviewDto;
 import com.zerobase.reservation.dto.review.ReviewDto;
+import com.zerobase.reservation.dto.review.UpdateReviewDto;
 import com.zerobase.reservation.service.review.ReviewService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -155,5 +156,30 @@ class ReviewControllerTest {
                 .with(SecurityMockMvcRequestPostProcessors.csrf())
         ).andExpect(status().isOk());
     }
+
+    @Test
+    @DisplayName("리뷰 수정")
+    @WithMockUser
+    public void update() throws Exception {
+        //given
+        String reviewCode = UUID.randomUUID().toString();
+        UpdateReviewDto.Request request = UpdateReviewDto.Request.builder()
+                .email("zerobase@naver.com")
+                .content("content")
+                .imageUrl("imageUrl")
+                .rating(1)
+                .build();
+
+        String json = objectMapper.writeValueAsString(request);
+
+        //when //then
+        mockMvc.perform(MockMvcRequestBuilders.delete("/reviews/{reviewCode}",reviewCode)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .with(SecurityMockMvcRequestPostProcessors.csrf())
+        ).andExpect(status().isOk());
+    }
+
+
 
 }

@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -43,6 +44,8 @@ class ReviewServiceTest {
     @Autowired
     ReviewRepository reviewRepository;
 
+    @Autowired
+    EntityManager em;
 
     @Test
     @DisplayName("리뷰 등록")
@@ -386,5 +389,62 @@ class ReviewServiceTest {
                 .orElse(null);
         Assertions.assertThat(findReview)
                 .isNull();;
+    }
+
+
+    @Test
+    @DisplayName("리뷰 수정")
+    public void update() throws Exception {
+        //given
+        //given
+        String email = "zerobase@naver.com";
+        Member member = Member.builder()
+                .email(email)
+                .nickname("닉네임")
+                .role(Role.USER)
+                .build();
+
+        Shop shop = Shop.builder()
+                .name("shop1")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
+                .build();
+
+        shopRepository.save(shop);
+        memberRepository.save(member);
+
+        Reservation reservation = Reservation.builder()
+                .member(member)
+                .shop(shop)
+                .startDateTime(LocalDateTime.now())
+                .endDateTime(LocalDateTime.now())
+                .build();
+
+        reservation.updateArrivalStatus();
+        reservationRepository.save(reservation);
+
+        Review review = Review.builder()
+                .member(member)
+                .shop(shop)
+                .reservation(reservation)
+                .rating(1)
+                .content("content")
+                .imageUrl("imageUrl")
+                .build();
+
+        reviewRepository.save(review);
+
+        //when
+        ReviewDto reviewDto = reviewService.update(review.getReviewCode(), "수정콘텐츠", 1, "updateImageUrl");
+
+        //쿼리 확인을 위한 영속성컨텍스트 초기화
+        em.flush();
+        em.clear();
+
+        //then
+        Assertions.assertThat(reviewDto)
+                .extracting("content", "rating", "imageUrl")
+                .contains("수정콘텐츠", 1, "updateImageUrl");
     }
 }
