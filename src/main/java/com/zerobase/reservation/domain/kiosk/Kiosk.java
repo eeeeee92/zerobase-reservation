@@ -46,19 +46,12 @@ public class Kiosk {
         this.installationStatus = InstallationStatus.N;
     }
 
-    public void updateShop(Shop shop) {
-        this.shop = shop;
-    }
-
-    public void updateInstallationLocation(String installationLocation) {
-        this.installationLocation = installationLocation;
-    }
-
-    public void updateInstallationYear(LocalDate installationYear) {
+    public void updateKiosk(LocalDate installationYear, String installationLocation, Shop shop, InstallationStatus installationStatus) {
         this.installationYear = installationYear;
-    }
-
-    public void updateInstallationStatus(InstallationStatus installationStatus) {
+        this.installationLocation = installationLocation;
+        this.shop = shop;
         this.installationStatus = installationStatus;
     }
+
+
 }

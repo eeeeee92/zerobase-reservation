@@ -54,14 +54,15 @@ public class KioskService {
         Kiosk kiosk = kioskRepository.findByKioskCode(kioskCode)
                 .orElseThrow(() -> new ArgumentException(ErrorCode.KIOSK_NOT_FOUND));
 
-        updateKiosk(installationYear, installationLocation, shop, kiosk);
+        kiosk.updateKiosk(installationYear, installationLocation, shop, InstallationStatus.Y);
         return KioskDto.of(kiosk);
     }
 
-    private static void updateKiosk(LocalDate installationYear, String installationLocation, Shop shop, Kiosk kiosk) {
-        kiosk.updateShop(shop);
-        kiosk.updateInstallationYear(installationYear);
-        kiosk.updateInstallationLocation(installationLocation);
-        kiosk.updateInstallationStatus(InstallationStatus.Y);
+    @Transactional
+    public void delete(String kioskCode) {
+        Kiosk kiosk = kioskRepository.findByKioskCode(kioskCode)
+                .orElseThrow(() -> new ArgumentException(ErrorCode.KIOSK_NOT_FOUND, kioskCode));
+        kioskRepository.delete(kiosk);
     }
+
 }

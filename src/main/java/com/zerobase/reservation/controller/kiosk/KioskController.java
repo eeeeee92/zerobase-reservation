@@ -1,6 +1,7 @@
 package com.zerobase.reservation.controller.kiosk;
 
 import com.zerobase.reservation.dto.kiosk.InstallationKioskDto;
+import com.zerobase.reservation.dto.kiosk.KioskInfoDetail;
 import com.zerobase.reservation.service.kiosk.KioskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +34,39 @@ public class KioskController {
         return ResponseEntity.ok().build();
     }
 
-    //TODO 등록
-    //TODO 삭제
-    //TODO 단건 조회
+    /**
+     * 키오스크 등록
+     */
+    @PostMapping
+    @PreAuthorize("isAuthenticated() and (hasRole('ADMIN'))")
+    public ResponseEntity<?> registration() {
+        kioskService.registration();
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 단건 조회
+     */
+    @GetMapping("/{kioskCode}")
+    @PreAuthorize("isAuthenticated() and (hasRole('ADMIN'))")
+    public ResponseEntity<KioskInfoDetail.Response> read(@PathVariable String kioskCode) {
+        return ResponseEntity.ok(
+                KioskInfoDetail.Response.of(
+                        kioskService.getKiosk(kioskCode)
+                )
+        );
+    }
+
+    /**
+     * 키오스크 삭제
+     */
+    @DeleteMapping("/{kioskCode}")
+    @PreAuthorize("isAuthenticated() and (hasRole('ADMIN'))")
+    public ResponseEntity<?> delete(@PathVariable String kioskCode) {
+        kioskService.delete(kioskCode);
+        return ResponseEntity.ok().build();
+    }
+
     //TODO 설치되지 않은 단말조회 (검색 조건 별 전체조회)
 
 }
