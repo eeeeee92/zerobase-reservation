@@ -6,6 +6,7 @@ import com.zerobase.reservation.domain.reservation.Reservation;
 import com.zerobase.reservation.domain.review.Review;
 import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.review.ReviewDto;
+import com.zerobase.reservation.dto.review.SearchConditionReviewDto;
 import com.zerobase.reservation.global.exception.ArgumentException;
 import com.zerobase.reservation.global.exception.ConflictException;
 import com.zerobase.reservation.global.exception.ErrorCode;
@@ -18,12 +19,16 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.UUID;
 
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @AcceptanceTest
@@ -446,5 +451,91 @@ class ReviewServiceTest {
         Assertions.assertThat(reviewDto)
                 .extracting("content", "rating", "imageUrl")
                 .contains("수정콘텐츠", 1, "updateImageUrl");
+    }
+
+    @Test
+    @DisplayName("검색조건별 리뷰 전체조회")
+    public void getReviewsBy() throws Exception {
+        //given
+        Member member = Member.builder()
+                .email("zerobase@naver.com")
+                .nickname("닉네임")
+                .role(Role.USER)
+                .build();
+
+        Shop shop = Shop.builder()
+                .name("shop1")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
+                .build();
+
+        shopRepository.save(shop);
+        memberRepository.save(member);
+
+        Reservation reservation1 = getReservation(member, shop);
+        reservation1.updateArrivalStatus();
+        Reservation reservation2 = getReservation(member, shop);
+        reservation2.updateArrivalStatus();
+        Reservation reservation3 = getReservation(member, shop);
+        reservation3.updateArrivalStatus();
+        Reservation reservation4 = getReservation(member, shop);
+        reservation4.updateArrivalStatus();
+        Reservation reservation5 = getReservation(member, shop);
+        reservation5.updateArrivalStatus();
+
+
+        reservationRepository.saveAll(
+                Arrays.asList(reservation1, reservation2, reservation3, reservation4, reservation5)
+        );
+
+        Review review1 = getReview(member, shop, reservation1, "imageUrl1", 1, "content1");
+        Review review2 = getReview(member, shop, reservation2, "imageUrl2", 2, "content2");
+        Review review3 = getReview(member, shop, reservation3, "imageUrl3", 3, "content3");
+        Review review4 = getReview(member, shop, reservation4, "imageUrl4", 4, "content4");
+        Review review5 = getReview(member, shop, reservation5, "imageUrl5", 5, "content5");
+        reviewRepository.saveAll(
+                Arrays.asList(review1, review2, review3, review4, review5)
+        );
+
+        SearchConditionReviewDto condition = SearchConditionReviewDto.builder()
+                .email("zerobase@naver.com")
+                .build();
+        PageRequest pageRequest = PageRequest.of(0, 5);
+
+
+        //when
+        Page<ReviewDto> reviews = reviewService.getReviewsBy(condition, pageRequest);
+
+        //then
+        Assertions.assertThat(reviews.getContent())
+                .extracting("member", "shop", "reviewCode","rating", "content", "imageUrl")
+                .containsExactlyInAnyOrder(
+                        tuple(member, shop, review1.getReviewCode(), review1.getRating(), review1.getContent(), review1.getImageUrl()),
+                        tuple(member, shop, review2.getReviewCode(), review2.getRating(), review2.getContent(), review2.getImageUrl()),
+                        tuple(member, shop, review3.getReviewCode(), review3.getRating(), review3.getContent(), review3.getImageUrl()),
+                        tuple(member, shop, review4.getReviewCode(), review4.getRating(), review4.getContent(), review4.getImageUrl()),
+                        tuple(member, shop, review5.getReviewCode(), review5.getRating(), review5.getContent(), review5.getImageUrl())
+                );
+    }
+
+    private static Review getReview(Member member, Shop shop, Reservation reservation, String imageUrl, int rating, String content) {
+        return Review.builder()
+                .member(member)
+                .shop(shop)
+                .reservation(reservation)
+                .imageUrl(imageUrl)
+                .rating(rating)
+                .content(content)
+                .build();
+    }
+
+    private static Reservation getReservation(Member member, Shop shop) {
+        return Reservation.builder()
+                .member(member)
+                .shop(shop)
+                .startDateTime(LocalDateTime.now())
+                .endDateTime(LocalDateTime.now())
+                .build();
     }
 }
