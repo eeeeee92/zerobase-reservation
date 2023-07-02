@@ -82,4 +82,41 @@ class KioskServiceTest {
                 .contains(serverErrorException.getErrorCode(), serverErrorException.getErrorMessage());
     }
 
+    @Test
+    @DisplayName("키오스크 등록")
+    public void registration() throws Exception {
+        //given
+        Kiosk kiosk = Kiosk.builder()
+                .build();
+        given(kioskRepository.save(any()))
+                .willReturn(kiosk);
+
+        //when
+        KioskDto kioskDto = kioskService.registration();
+
+        //then
+        Assertions.assertThat(kioskDto)
+                .extracting("kioskCode","installationStatus")
+                .contains(kiosk.getKioskCode(), InstallationStatus.N);
+    }
+
+    @Test
+    @DisplayName("키오스크 삭제")
+    public void delete() throws Exception {
+        //given
+        String kioskCode = UUID.randomUUID().toString();
+        given(kioskRepository.findByKioskCode(any()))
+                .willReturn(Optional.of(
+                        Kiosk.builder().build())
+                );
+
+        //when
+        kioskService.delete(kioskCode);
+
+        //then
+        verify(kioskRepository, times(1)).findByKioskCode(any());
+        verify(kioskRepository, times(1)).delete(any());
+    }
+
+
 }
