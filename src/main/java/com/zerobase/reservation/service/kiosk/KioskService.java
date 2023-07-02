@@ -3,6 +3,7 @@ package com.zerobase.reservation.service.kiosk;
 import com.zerobase.reservation.domain.kiosk.Kiosk;
 import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.kiosk.KioskDto;
+import com.zerobase.reservation.dto.kiosk.SearchConditionKioskDto;
 import com.zerobase.reservation.global.exception.ArgumentException;
 import com.zerobase.reservation.global.exception.ErrorCode;
 import com.zerobase.reservation.global.exception.ServerErrorException;
@@ -11,6 +12,8 @@ import com.zerobase.reservation.repository.shop.ShopRepository;
 import com.zerobase.reservation.type.InstallationStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +61,9 @@ public class KioskService {
         return KioskDto.of(kiosk);
     }
 
+    /**
+     * 키오스크 삭제
+     */
     @Transactional
     public void delete(String kioskCode) {
         Kiosk kiosk = kioskRepository.findByKioskCode(kioskCode)
@@ -65,6 +71,9 @@ public class KioskService {
         kioskRepository.delete(kiosk);
     }
 
+    /**
+     * 키오스크 설치 해제
+     */
     @Transactional
     public KioskDto unInstall(String kioskCode) {
 
@@ -74,4 +83,11 @@ public class KioskService {
         return KioskDto.of(kiosk);
     }
 
+    /**
+     * 검색조건별 키오스크 전체 조회
+     */
+    public Page<KioskDto> getKiosksBy(SearchConditionKioskDto condition, Pageable pageable) {
+        return kioskRepository.findAllBySearchConditions(condition, pageable)
+                .map(KioskDto::of);
+    }
 }

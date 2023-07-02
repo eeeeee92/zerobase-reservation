@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface KioskRepository extends JpaRepository<Kiosk, Long> {
+public interface KioskRepository extends JpaRepository<Kiosk, Long>, KioskRepositoryQueryDsl {
 
     @EntityGraph(attributePaths = "shop")
     Optional<Kiosk> findByKioskCode(String kioskCode);
