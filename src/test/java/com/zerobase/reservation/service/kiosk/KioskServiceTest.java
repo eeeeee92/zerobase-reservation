@@ -4,6 +4,7 @@ import com.zerobase.reservation.config.AcceptanceTest;
 import com.zerobase.reservation.domain.kiosk.Kiosk;
 import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.kiosk.KioskDto;
+import com.zerobase.reservation.dto.kiosk.SearchConditionKioskDto;
 import com.zerobase.reservation.global.exception.ErrorCode;
 import com.zerobase.reservation.global.exception.ServerErrorException;
 import com.zerobase.reservation.repository.kiosk.KioskRepository;
@@ -13,13 +14,20 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -96,7 +104,7 @@ class KioskServiceTest {
 
         //then
         Assertions.assertThat(kioskDto)
-                .extracting("kioskCode","installationStatus")
+                .extracting("kioskCode", "installationStatus")
                 .contains(kiosk.getKioskCode(), InstallationStatus.N);
     }
 
@@ -142,6 +150,50 @@ class KioskServiceTest {
         Assertions.assertThat(kioskDto.getInstallationStatus())
                 .isEqualTo(InstallationStatus.N);
 
+    }
+
+    @Test
+    @DisplayName("검색조건별 키오스크 전체조회")
+    public void getKiosksBy() throws Exception {
+        //given
+        String shopCode = UUID.randomUUID().toString();
+
+        SearchConditionKioskDto condition = SearchConditionKioskDto.builder()
+                .shopCode(shopCode)
+                .build();
+        Shop shop = Shop.builder()
+                .name("상점")
+                .build();
+
+        List<Kiosk> kiosk = IntStream.range(1, 6)
+                .mapToObj(value ->
+                        Kiosk.builder()
+                                .shop(shop)
+                                .installationLocation(String.format("현관 %d층", value))
+                                .installationYear(LocalDate.of(2022, 5, 2 + value))
+                                .build())
+                .collect(Collectors.toList());
+        kiosk.forEach(value -> value.updateKiosk(value.getInstallationYear(), value.getInstallationLocation(), value.getShop(), InstallationStatus.Y));
+        PageImpl<Kiosk> pageKiosks = new PageImpl<>(kiosk);
+
+        PageRequest pageRequest = PageRequest.of(0, 5);
+        given(kioskRepository.findAllBySearchConditions(any(), any()))
+                .willReturn(pageKiosks);
+
+        //when
+        Page<KioskDto> result = kioskService.getKiosksBy(condition, pageRequest);
+
+        //then
+        Assertions.assertThat(result.getContent())
+                .extracting("shop", "installationLocation", "installationYear", "installationStatus")
+                .containsExactlyInAnyOrder(
+                        tuple(shop, "현관 1층", LocalDate.of(2022, 5, 3), InstallationStatus.Y),
+                        tuple(shop, "현관 2층", LocalDate.of(2022, 5, 4), InstallationStatus.Y),
+                        tuple(shop, "현관 3층", LocalDate.of(2022, 5, 5), InstallationStatus.Y),
+                        tuple(shop, "현관 4층", LocalDate.of(2022, 5, 6), InstallationStatus.Y),
+                        tuple(shop, "현관 5층", LocalDate.of(2022, 5, 7), InstallationStatus.Y)
+                );
+        Assertions.assertThat(result.getContent()).hasSize(5);
     }
 
 

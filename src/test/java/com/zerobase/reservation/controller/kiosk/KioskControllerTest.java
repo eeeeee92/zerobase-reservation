@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -18,14 +19,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -50,9 +49,9 @@ class KioskControllerTest {
     public void registration() throws Exception {
         //when //then
         mockMvc.perform(post("/kiosks")
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(SecurityMockMvcRequestPostProcessors.csrf())
-        ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                ).andDo(print())
                 .andExpect(status().isOk());
 
     }
@@ -102,10 +101,10 @@ class KioskControllerTest {
 
 
         //when //then
-        mockMvc.perform(get("/kiosks/{kioskCode}",kioskCode)
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(SecurityMockMvcRequestPostProcessors.csrf())
-        ).andDo(print())
+        mockMvc.perform(get("/kiosks/{kioskCode}", kioskCode)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                ).andDo(print())
                 .andExpect(jsonPath("$.shopName").value(kioskDto.getShop().getName()))
                 .andExpect(jsonPath("$.shopCode").value(kioskDto.getShop().getShopCode()))
                 .andExpect(jsonPath("$.kioskCode").value(kioskDto.getKioskCode()))
@@ -143,6 +142,49 @@ class KioskControllerTest {
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                 ).andDo(print())
                 .andExpect(status().isOk());
+    }
+
+
+    @Test
+    @DisplayName("검색조건별 키오스크 전체조회")
+    @WithMockUser
+    public void readAllByCondition() throws Exception {
+        //given
+
+        String name = "상점";
+        Shop shop = Shop.builder()
+                .name(name)
+                .build();
+        LocalDate installationYear = LocalDate.of(2022, 5, 23);
+        InstallationStatus installationStatus = InstallationStatus.Y;
+        String installationLocation = "현관1층";
+        String kioskCode = UUID.randomUUID().toString();
+        List<KioskDto> kiosks = Arrays.asList(KioskDto.builder()
+                .shop(shop)
+                .kioskCode(kioskCode)
+                .installationLocation(installationLocation)
+                .installationStatus(installationStatus)
+                .installationYear(installationYear)
+                .build()
+        );
+        PageImpl<KioskDto> pageKiosks = new PageImpl<>(kiosks);
+        given(kioskService.getKiosksBy(any(), any()))
+                .willReturn(pageKiosks);
+
+        //when //then
+        mockMvc.perform(get("/kiosks")
+                        .param("shopCode", shop.getShopCode())
+                        .param("installationStatus", InstallationStatus.Y.name())
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                ).andDo(print())
+                .andExpect(jsonPath("$.content[0].shopName").value(name))
+                .andExpect(jsonPath("$.content[0].shopCode").value(shop.getShopCode()))
+                .andExpect(jsonPath("$.content[0].kioskCode").value(kioskCode))
+                .andExpect(jsonPath("$.content[0].installationLocation").value(installationLocation))
+                .andExpect(jsonPath("$.content[0].installationYear").value(installationYear.toString()))
+                .andExpect(jsonPath("$.content[0].installationStatus").value(installationStatus.getDescription()));
+
+
     }
 
 }
