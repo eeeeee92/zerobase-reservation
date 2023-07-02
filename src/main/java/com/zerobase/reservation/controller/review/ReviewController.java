@@ -1,6 +1,7 @@
 package com.zerobase.reservation.controller.review;
 
 import com.zerobase.reservation.dto.review.CreateReviewDto;
+import com.zerobase.reservation.dto.review.DeleteReviewDto;
 import com.zerobase.reservation.dto.review.ReviewInfoDetailDto;
 import com.zerobase.reservation.service.review.ReviewService;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +44,19 @@ public class ReviewController {
         );
     }
 
-    //TODO 리뷰 전체조회 ( 검색조건별 )
-    //TODO 리뷰 삭제
+    /**
+     * 리뷰 삭제
+     */
+    @DeleteMapping("/{reviewCode}")
+    @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
+    public ResponseEntity<?> delete(@PathVariable String reviewCode,
+                                    @RequestBody DeleteReviewDto.Request request) {
+        reviewService.delete(reviewCode);
+        return ResponseEntity.ok().build();
+    }
+
     //TODO 리뷰 수정
+
+    //TODO 리뷰 전체조회 ( 검색조건별 )
 
 }

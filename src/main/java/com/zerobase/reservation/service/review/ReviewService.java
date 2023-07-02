@@ -47,6 +47,8 @@ public class ReviewService {
 
         Shop shop = getShopBy(shopCode);
 
+        //TODO 파일 저장(이미지)
+
         return ReviewDto.of(reviewRepository.save(getReview(rating, content, imageUrl, reservation, member, shop)));
 
     }
@@ -58,6 +60,15 @@ public class ReviewService {
     public ReviewDto getReview(String reviewCode) {
         return ReviewDto.of(reviewRepository.findByReviewCode(reviewCode)
                 .orElseThrow(() -> new ArgumentException(ErrorCode.REVIEW_NOT_FOUND, reviewCode)));
+    }
+
+    @Transactional
+    public void delete(String reviewCode) {
+        Review review = reviewRepository.findByReviewCode(reviewCode)
+                .orElseThrow(() -> new ArgumentException(ErrorCode.REVIEW_NOT_FOUND, reviewCode));
+
+        reviewRepository.delete(review);
+        //TODO 파일 삭제(이미지)
     }
 
 
@@ -98,4 +109,5 @@ public class ReviewService {
                 .imageUrl(imageUrl)
                 .build();
     }
+
 }
