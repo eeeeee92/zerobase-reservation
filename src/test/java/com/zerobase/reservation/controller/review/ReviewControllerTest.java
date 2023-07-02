@@ -5,6 +5,7 @@ import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.domain.review.Review;
 import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.review.CreateReviewDto;
+import com.zerobase.reservation.dto.review.DeleteReviewDto;
 import com.zerobase.reservation.dto.review.ReviewDto;
 import com.zerobase.reservation.service.review.ReviewService;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.UUID;
 
@@ -132,6 +134,26 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.rating").value(rating))
                 .andExpect(jsonPath("$.content").value(content))
                 .andExpect(jsonPath("$.reviewImageUrl").value(reviewImageUrl));
+    }
+
+    @Test
+    @DisplayName("리뷰 삭제")
+    @WithMockUser
+    public void delete() throws Exception {
+        //given
+        String reviewCode = UUID.randomUUID().toString();
+        DeleteReviewDto.Request request = DeleteReviewDto.Request.builder()
+                .email("zerobase@naver.com")
+                .build();
+
+        String json = objectMapper.writeValueAsString(request);
+
+        //when //then
+        mockMvc.perform(MockMvcRequestBuilders.delete("/reviews/{reviewCode}",reviewCode)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .with(SecurityMockMvcRequestPostProcessors.csrf())
+        ).andExpect(status().isOk());
     }
 
 }

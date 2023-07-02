@@ -334,4 +334,57 @@ class ReviewServiceTest {
         //then
         Assertions.assertThat(findReview).isEqualTo(saveReview);
     }
+
+    @Test
+    @DisplayName("리뷰 삭제")
+    public void delete() throws Exception {
+        //given
+        String email = "zerobase@naver.com";
+        Member member = Member.builder()
+                .email(email)
+                .nickname("닉네임")
+                .role(Role.USER)
+                .build();
+
+        Shop shop = Shop.builder()
+                .name("shop1")
+                .latitude(12.0)
+                .longitude(13.0)
+                .rating(1.0)
+                .build();
+
+        shopRepository.save(shop);
+        memberRepository.save(member);
+
+        Reservation reservation = Reservation.builder()
+                .member(member)
+                .shop(shop)
+                .startDateTime(LocalDateTime.now())
+                .endDateTime(LocalDateTime.now())
+                .build();
+
+        reservation.updateArrivalStatus();
+        reservationRepository.save(reservation);
+
+        Review review = Review.builder()
+                .member(member)
+                .shop(shop)
+                .reservation(reservation)
+                .rating(1)
+                .content("content")
+                .imageUrl("imageUrl")
+                .build();
+
+        reviewRepository.save(review);
+
+
+        //when
+        reviewService.delete(review.getReviewCode());
+
+        //then
+        Review findReview = reviewRepository.findByReviewCode(review.getReviewCode())
+                .orElse(null);
+        Assertions.assertThat(findReview)
+                .isNull();;
+    }
 }
