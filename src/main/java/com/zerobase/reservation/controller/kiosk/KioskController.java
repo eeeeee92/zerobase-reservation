@@ -20,7 +20,7 @@ public class KioskController {
     /**
      * 키오스크 설치
      */
-    @PutMapping("/{kioskCode}")
+    @PutMapping("/installation/{kioskCode}")
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN'))")
     public ResponseEntity<?> installation(@PathVariable String kioskCode,
                                           @RequestBody InstallationKioskDto.Request request) {
@@ -66,6 +66,17 @@ public class KioskController {
         kioskService.delete(kioskCode);
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * 설치 해제
+     */
+    @PutMapping("/uninstall/{kioskCode}")
+    @PreAuthorize("isAuthenticated() and (hasRole('ADMIN'))")
+    public ResponseEntity<?> uninstall(@PathVariable String kioskCode) {
+        kioskService.unInstall(kioskCode);
+        return ResponseEntity.ok().build();
+    }
+
 
     //TODO 설치되지 않은 단말조회 (검색 조건 별 전체조회)
 

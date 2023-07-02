@@ -65,4 +65,13 @@ public class KioskService {
         kioskRepository.delete(kiosk);
     }
 
+    @Transactional
+    public KioskDto unInstall(String kioskCode) {
+
+        Kiosk kiosk = kioskRepository.findByKioskCode(kioskCode)
+                .orElseThrow(() -> new ArgumentException(ErrorCode.KIOSK_NOT_FOUND, kioskCode));
+        kiosk.updateKiosk(null, null, null, InstallationStatus.N);
+        return KioskDto.of(kiosk);
+    }
+
 }
