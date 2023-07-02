@@ -5,6 +5,7 @@ import com.zerobase.reservation.domain.reservation.Reservation;
 import com.zerobase.reservation.domain.review.Review;
 import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.review.ReviewDto;
+import com.zerobase.reservation.dto.review.SearchConditionReviewDto;
 import com.zerobase.reservation.global.exception.ArgumentException;
 import com.zerobase.reservation.global.exception.ConflictException;
 import com.zerobase.reservation.global.exception.ErrorCode;
@@ -15,6 +16,8 @@ import com.zerobase.reservation.repository.shop.ShopRepository;
 import com.zerobase.reservation.type.ArrivalStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,6 +83,14 @@ public class ReviewService {
         //TODO 파일 삭제
         //TODO 파일 저장(이미지)
         return ReviewDto.of(review);
+    }
+
+    /**
+     * 검색조건별 리뷰 전체조회
+     */
+    public Page<ReviewDto> getReviewsBy(SearchConditionReviewDto condition, Pageable pageable) {
+        return reviewRepository.findAllBySearchConditions(condition, pageable)
+                .map(ReviewDto::of);
     }
 
 

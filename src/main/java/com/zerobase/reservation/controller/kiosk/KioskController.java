@@ -1,8 +1,8 @@
 package com.zerobase.reservation.controller.kiosk;
 
 import com.zerobase.reservation.dto.kiosk.InstallationKioskDto;
-import com.zerobase.reservation.dto.kiosk.KioskInfo;
 import com.zerobase.reservation.dto.kiosk.KioskInfoDetail;
+import com.zerobase.reservation.dto.kiosk.KioskInfoDto;
 import com.zerobase.reservation.dto.kiosk.SearchConditionKioskDto;
 import com.zerobase.reservation.service.kiosk.KioskService;
 import lombok.RequiredArgsConstructor;
@@ -89,11 +89,11 @@ public class KioskController {
      */
     @GetMapping
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN'))")
-    public ResponseEntity<Page<KioskInfo.Response>> readAllByCondition(SearchConditionKioskDto condition,
-                                                                       @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<Page<KioskInfoDto.Response>> readAllByCondition(SearchConditionKioskDto condition,
+                                                                          @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(
                 kioskService.getKiosksBy(condition, pageable)
-                        .map(KioskInfo.Response::of)
+                        .map(KioskInfoDto.Response::of)
         );
     }
 

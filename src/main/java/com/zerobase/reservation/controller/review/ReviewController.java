@@ -1,12 +1,13 @@
 package com.zerobase.reservation.controller.review;
 
-import com.zerobase.reservation.dto.review.CreateReviewDto;
-import com.zerobase.reservation.dto.review.DeleteReviewDto;
-import com.zerobase.reservation.dto.review.ReviewInfoDetailDto;
-import com.zerobase.reservation.dto.review.UpdateReviewDto;
+import com.zerobase.reservation.dto.review.*;
 import com.zerobase.reservation.service.review.ReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -67,6 +68,17 @@ public class ReviewController {
         return ResponseEntity.ok().build();
     }
 
-    //TODO 리뷰 전체조회 ( 검색조건별 )
+    /**
+     * 검색조건별 리뷰전체조회
+     */
+    @GetMapping
+    public ResponseEntity<Page<ReviewInfoDto.Response>> readAllByConditions(
+            SearchConditionReviewDto searchConditionReviewDto,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(
+                reviewService.getReviewsBy(searchConditionReviewDto, pageable)
+                        .map(ReviewInfoDto.Response::of)
+        );
+    }
 
 }

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-public class KioskInfo {
+public class KioskInfoDto {
 
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -31,7 +31,7 @@ public class KioskInfo {
         }
 
         public static Response of(KioskDto kioskDto) {
-            return KioskInfo.Response.builder()
+            return KioskInfoDto.Response.builder()
                     .shopName(kioskDto.getShop().getName())
                     .shopCode(kioskDto.getShop().getShopCode())
                     .kioskCode(kioskDto.getKioskCode())
