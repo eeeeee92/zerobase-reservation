@@ -56,5 +56,10 @@ public class Review {
         this.reviewCode = UUID.randomUUID().toString();
     }
 
+    public void updateReview(Integer rating, String content, String imageUrl) {
+        this.rating = rating;
+        this.content = content;
+        this.imageUrl = imageUrl;
+    }
 
 }

@@ -29,7 +29,6 @@ public class ReviewService {
     private final MemberRepository memberRepository;
     private final ShopRepository shopRepository;
 
-
     /**
      * 리뷰 등록
      */
@@ -62,6 +61,7 @@ public class ReviewService {
                 .orElseThrow(() -> new ArgumentException(ErrorCode.REVIEW_NOT_FOUND, reviewCode)));
     }
 
+
     @Transactional
     public void delete(String reviewCode) {
         Review review = reviewRepository.findByReviewCode(reviewCode)
@@ -69,6 +69,17 @@ public class ReviewService {
 
         reviewRepository.delete(review);
         //TODO 파일 삭제(이미지)
+    }
+
+    @Transactional
+    public ReviewDto update(String reviewCode, String content, Integer rating, String imageUrl) {
+        Review review = reviewRepository.findByReviewCode(reviewCode)
+                .orElseThrow(() -> new ArgumentException(ErrorCode.REVIEW_NOT_FOUND, reviewCode));
+
+        review.updateReview(rating, content, imageUrl);
+        //TODO 파일 삭제
+        //TODO 파일 저장(이미지)
+        return ReviewDto.of(review);
     }
 
 
@@ -109,5 +120,6 @@ public class ReviewService {
                 .imageUrl(imageUrl)
                 .build();
     }
+
 
 }

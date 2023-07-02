@@ -3,6 +3,7 @@ package com.zerobase.reservation.controller.review;
 import com.zerobase.reservation.dto.review.CreateReviewDto;
 import com.zerobase.reservation.dto.review.DeleteReviewDto;
 import com.zerobase.reservation.dto.review.ReviewInfoDetailDto;
+import com.zerobase.reservation.dto.review.UpdateReviewDto;
 import com.zerobase.reservation.service.review.ReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +56,16 @@ public class ReviewController {
         return ResponseEntity.ok().build();
     }
 
-    //TODO 리뷰 수정
+    /**
+     * 리뷰 수정
+     */
+    @PutMapping("/reservationCode")
+    @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
+    public ResponseEntity<?> update(@PathVariable String reviewCode,
+                                    @RequestBody UpdateReviewDto.Request request) {
+        reviewService.update(reviewCode, request.getContent(), request.getRating(), request.getImageUrl());
+        return ResponseEntity.ok().build();
+    }
 
     //TODO 리뷰 전체조회 ( 검색조건별 )
 
