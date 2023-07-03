@@ -59,6 +59,8 @@ public class SecurityConfig {
                 .antMatchers(HttpMethod.GET, "/shops/{shopCode}").permitAll()
                 .antMatchers(HttpMethod.GET, "/shops").permitAll()
                 .antMatchers(HttpMethod.GET, "/reviews/{reviewCode}").permitAll()
+                .antMatchers(HttpMethod.GET, "/reviews").permitAll()
+
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
