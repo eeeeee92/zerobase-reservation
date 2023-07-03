@@ -1,7 +1,7 @@
 package com.zerobase.reservation.config;
 
 import com.zerobase.reservation.global.common.ParamToSortConverter;
-import com.zerobase.reservation.global.resolver.shop.PageRequestArgumentResolver;
+import com.zerobase.reservation.global.resolver.PageRequestArgumentResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;

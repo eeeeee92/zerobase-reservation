@@ -1,4 +1,4 @@
-package com.zerobase.reservation.global.resolver.shop;
+package com.zerobase.reservation.dto;
 
 import com.zerobase.reservation.dto.Sort;
 import lombok.Getter;

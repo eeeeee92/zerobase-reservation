@@ -2,14 +2,12 @@ package com.zerobase.reservation.service.shop;
 
 import com.zerobase.reservation.domain.member.Member;
 import com.zerobase.reservation.domain.shop.MemberShop;
-import com.zerobase.reservation.domain.shop.MemberShopId;
 import com.zerobase.reservation.domain.shop.Shop;
 import com.zerobase.reservation.dto.shop.SearchConditionShopDto;
 import com.zerobase.reservation.dto.shop.ShopDto;
 import com.zerobase.reservation.dto.shop.ShopInfoDto;
 import com.zerobase.reservation.global.exception.ArgumentException;
-import com.zerobase.reservation.global.exception.ErrorCode;
-import com.zerobase.reservation.global.resolver.shop.PageRequest;
+import com.zerobase.reservation.dto.PageRequest;
 import com.zerobase.reservation.repository.member.MemberRepository;
 import com.zerobase.reservation.repository.reservation.ReservationRepository;
 import com.zerobase.reservation.repository.review.ReviewRepository;

@@ -1,7 +1,9 @@
-package com.zerobase.reservation.global.resolver.shop;
+package com.zerobase.reservation.global.resolver;
 
+import com.zerobase.reservation.global.annotation.PageDefault;
 import com.zerobase.reservation.dto.Sort;
 import com.zerobase.reservation.global.common.ParamToSortConverter;
+import com.zerobase.reservation.dto.PageRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;

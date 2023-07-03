@@ -1,4 +1,4 @@
-package com.zerobase.reservation.global.resolver.shop;
+package com.zerobase.reservation.global.annotation;
 
 import com.zerobase.reservation.global.common.ColumnNamesConstants;
 
