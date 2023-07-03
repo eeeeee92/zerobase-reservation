@@ -2,6 +2,7 @@ package com.zerobase.reservation.controller.reservation;
 
 import com.zerobase.reservation.dto.kiosk.KioskDto;
 import com.zerobase.reservation.dto.reservation.*;
+import com.zerobase.reservation.global.annotation.Trace;
 import com.zerobase.reservation.service.kiosk.KioskService;
 import com.zerobase.reservation.service.reservation.ReservationService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class ReservationController {
     /**
      * 예약
      */
+    @Trace
     @PostMapping
     @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
     public ResponseEntity<?> create(@Valid @RequestBody CreateReservationDto.Request request) {
@@ -46,6 +48,7 @@ public class ReservationController {
     /**
      * 예약 전체조회 (검색조건별)
      */
+    @Trace
     @GetMapping
     @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) or (hasRole('SELLER')))")
     public ResponseEntity<Page<ReservationInfoDto.Response>> readAllByCondition(
@@ -60,6 +63,7 @@ public class ReservationController {
     /**
      * 예약 단건조회
      */
+    @Trace
     @GetMapping("/{reservationCode}")
     @PreAuthorize("isAuthenticated() and (hasRole('USER') or (hasRole('SELLER')))")
     @PostAuthorize("returnObject.body.reservationEmail == principal.username or hasRole('SELLER')")
@@ -73,6 +77,7 @@ public class ReservationController {
     /**
      * 도착 요청
      */
+    @Trace
     @PutMapping("/{reservationCode}/arrival")
     @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
     public ResponseEntity<?> arrival(@PathVariable String reservationCode,
@@ -86,6 +91,7 @@ public class ReservationController {
     /**
      * 예약 취소
      */
+    @Trace
     @DeleteMapping("/{reservationCode}")
     @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
     public ResponseEntity<?> delete(@PathVariable String reservationCode,
@@ -97,6 +103,7 @@ public class ReservationController {
     /**
      * 예약 수정
      */
+    @Trace
     @PutMapping("/{reservationCode}")
     @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
     public ResponseEntity<?> update(@PathVariable String reservationCode,

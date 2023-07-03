@@ -4,6 +4,7 @@ import com.zerobase.reservation.dto.kiosk.InstallationKioskDto;
 import com.zerobase.reservation.dto.kiosk.KioskInfoDetail;
 import com.zerobase.reservation.dto.kiosk.KioskInfoDto;
 import com.zerobase.reservation.dto.kiosk.SearchConditionKioskDto;
+import com.zerobase.reservation.global.annotation.Trace;
 import com.zerobase.reservation.service.kiosk.KioskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ public class KioskController {
     /**
      * 키오스크 설치
      */
+    @Trace
     @PutMapping("/installation/{kioskCode}")
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN'))")
     public ResponseEntity<?> installation(@PathVariable String kioskCode,
@@ -43,6 +45,7 @@ public class KioskController {
     /**
      * 키오스크 등록
      */
+    @Trace
     @PostMapping
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN'))")
     public ResponseEntity<?> registration() {
@@ -53,6 +56,7 @@ public class KioskController {
     /**
      * 단건 조회
      */
+    @Trace
     @GetMapping("/{kioskCode}")
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN'))")
     public ResponseEntity<KioskInfoDetail.Response> read(@PathVariable String kioskCode) {
@@ -66,6 +70,7 @@ public class KioskController {
     /**
      * 키오스크 삭제
      */
+    @Trace
     @DeleteMapping("/{kioskCode}")
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN'))")
     public ResponseEntity<?> delete(@PathVariable String kioskCode) {
@@ -76,6 +81,7 @@ public class KioskController {
     /**
      * 설치 해제
      */
+    @Trace
     @PutMapping("/uninstall/{kioskCode}")
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN'))")
     public ResponseEntity<?> uninstall(@PathVariable String kioskCode) {
@@ -87,6 +93,7 @@ public class KioskController {
     /**
      * 검색조건별 키오스크 전체조회
      */
+    @Trace
     @GetMapping
     @PreAuthorize("isAuthenticated() and (hasRole('ADMIN'))")
     public ResponseEntity<Page<KioskInfoDto.Response>> readAllByCondition(SearchConditionKioskDto condition,

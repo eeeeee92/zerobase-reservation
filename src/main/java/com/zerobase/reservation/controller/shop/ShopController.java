@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.zerobase.reservation.dto.shop.*;
 import com.zerobase.reservation.global.annotation.PageDefault;
 import com.zerobase.reservation.dto.PageRequest;
+import com.zerobase.reservation.global.annotation.Trace;
 import com.zerobase.reservation.service.shop.ShopService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ public class ShopController {
     /**
      * 상점 등록
      */
+    @Trace
     @PostMapping
     @PreAuthorize("isAuthenticated() and (hasRole('SELLER'))")
     public ResponseEntity<?> create(@Valid @RequestBody CreateShopDto.Request request) {
@@ -37,6 +39,7 @@ public class ShopController {
     /**
      * 상점 단건조회
      */
+    @Trace
     @GetMapping("/{shopCode}")
     public ResponseEntity<ShopInfoDetailDto.Response> read(@PathVariable String shopCode) {
         ShopDto shopDto = shopService.getShop(shopCode);
@@ -48,6 +51,7 @@ public class ShopController {
     /**
      * 상점 전체조회 (검색조건별)
      */
+    @Trace
     @GetMapping
     public ResponseEntity<PageInfo<ShopInfoDto.Response>> readAll(@PageDefault(sort = NAME) PageRequest pageRequest,
                                                                   SearchConditionShopDto searchConditionShopDto) {
@@ -60,6 +64,7 @@ public class ShopController {
     /**
      * 상점 수정
      */
+    @Trace
     @PutMapping("/{shopCode}")
     @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('SELLER')))")
     public ResponseEntity<?> update(@PathVariable String shopCode,
@@ -71,6 +76,7 @@ public class ShopController {
     /**
      * 상점 삭제
      */
+    @Trace
     @DeleteMapping("/{shopCode}")
     @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('SELLER')))")
     public ResponseEntity<?> delete(@PathVariable String shopCode,

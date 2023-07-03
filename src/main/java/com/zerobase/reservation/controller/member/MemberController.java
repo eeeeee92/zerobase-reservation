@@ -4,6 +4,7 @@ import com.zerobase.reservation.dto.member.DeleteMemberDto;
 import com.zerobase.reservation.dto.member.MemberInfoDetail;
 import com.zerobase.reservation.dto.member.SignupDto;
 import com.zerobase.reservation.dto.member.UpdateMemberDto;
+import com.zerobase.reservation.global.annotation.Trace;
 import com.zerobase.reservation.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public class MemberController {
     /**
      * 회원가입
      */
+    @Trace
     @PostMapping("/sign-up")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignupDto signupDto) {
         memberService.signUp(
@@ -38,6 +40,7 @@ public class MemberController {
     /**
      * 회원수정
      */
+    @Trace
     @PutMapping("/{email}")
     @PreAuthorize("isAuthenticated() and ((#email == principal.username))")
     public ResponseEntity<?> update(@PathVariable String email,
@@ -55,6 +58,7 @@ public class MemberController {
     /**
      * 회원 탈퇴
      */
+    @Trace
     @DeleteMapping("/{email}")
     @PreAuthorize("isAuthenticated() and ((#email == principal.username))")
     public ResponseEntity<?> delete(@PathVariable String email,
@@ -67,6 +71,7 @@ public class MemberController {
     /**
      * 회원 단건 조회
      */
+    @Trace
     @GetMapping("/{email}")
     @PreAuthorize("isAuthenticated() and ((#email == principal.username))")
     public ResponseEntity<MemberInfoDetail.Response> read(@PathVariable String email) {

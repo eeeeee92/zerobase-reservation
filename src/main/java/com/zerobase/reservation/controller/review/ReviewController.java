@@ -1,6 +1,7 @@
 package com.zerobase.reservation.controller.review;
 
 import com.zerobase.reservation.dto.review.*;
+import com.zerobase.reservation.global.annotation.Trace;
 import com.zerobase.reservation.service.review.ReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ public class ReviewController {
     /**
      * 리뷰 등록
      */
+    @Trace
     @PostMapping
     @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
     public ResponseEntity<?> create(@Valid @RequestBody CreateReviewDto.Request request) {
@@ -39,6 +41,7 @@ public class ReviewController {
     /**
      * 리뷰 단건조회
      */
+    @Trace
     @GetMapping("/{reviewCode}")
     public ResponseEntity<ReviewInfoDetailDto.Response> read(@PathVariable String reviewCode) {
         return ResponseEntity.ok(
@@ -49,6 +52,7 @@ public class ReviewController {
     /**
      * 리뷰 삭제
      */
+    @Trace
     @DeleteMapping("/{reviewCode}")
     @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
     public ResponseEntity<?> delete(@PathVariable String reviewCode,
@@ -60,6 +64,7 @@ public class ReviewController {
     /**
      * 리뷰 수정
      */
+    @Trace
     @PutMapping("/{reviewCode}")
     @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
     public ResponseEntity<?> update(@PathVariable String reviewCode,
@@ -71,6 +76,7 @@ public class ReviewController {
     /**
      * 검색조건별 리뷰전체조회
      */
+    @Trace
     @GetMapping
     public ResponseEntity<Page<ReviewInfoDto.Response>> readAllByConditions(
             SearchConditionReviewDto searchConditionReviewDto,
