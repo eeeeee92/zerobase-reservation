@@ -177,7 +177,7 @@ class ReviewControllerTest {
         String json = objectMapper.writeValueAsString(request);
 
         //when //then
-        mockMvc.perform(MockMvcRequestBuilders.delete("/reviews/{reviewCode}", reviewCode)
+        mockMvc.perform(MockMvcRequestBuilders.put("/reviews/{reviewCode}", reviewCode)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json)
                 .with(SecurityMockMvcRequestPostProcessors.csrf())

@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
 
@@ -31,14 +32,20 @@ public class KioskInfoDetail {
         }
 
         public static Response of(KioskDto kioskDto) {
-            return Response.builder()
-                    .shopName(kioskDto.getShop().getName())
-                    .shopCode(kioskDto.getShop().getShopCode())
+
+            Response.ResponseBuilder builder = Response.builder()
                     .kioskCode(kioskDto.getKioskCode())
                     .installationLocation(kioskDto.getInstallationLocation())
                     .installationYear(kioskDto.getInstallationYear())
-                    .installationStatus(kioskDto.getInstallationStatus().getDescription())
-                    .build();
+                    .installationStatus(kioskDto.getInstallationStatus().getDescription());
+
+            if (!ObjectUtils.isEmpty(kioskDto.getShop())) {
+                builder.shopCode(kioskDto.getShop().getShopCode())
+                        .shopName(kioskDto.getShop().getName());
+
+            }
+            return builder.build();
+
         }
 
     }

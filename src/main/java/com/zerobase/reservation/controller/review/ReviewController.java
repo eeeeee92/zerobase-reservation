@@ -60,7 +60,7 @@ public class ReviewController {
     /**
      * 리뷰 수정
      */
-    @PutMapping("/reservationCode")
+    @PutMapping("/{reviewCode}")
     @PreAuthorize("isAuthenticated() and ((#request.email == principal.username) and (hasRole('USER')))")
     public ResponseEntity<?> update(@PathVariable String reviewCode,
                                     @RequestBody UpdateReviewDto.Request request) {

@@ -41,6 +41,7 @@ public class KioskService {
     /**
      * 키오스크 등록
      */
+    @Transactional
     public KioskDto registration() {
         return KioskDto.of(kioskRepository.save(Kiosk.builder()
                 .build())
